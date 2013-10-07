@@ -3,11 +3,13 @@ import sys
 
 sys.path.append("../..")
 
-
+import os
+print(os.getcwd())
 import unittest
 import dimitripy.ingest
 import dimitripy.base
 import dimitripy.post_processing_tool
+
 
 class TestTimeSeriesIntercomparison(unittest.TestCase):
     def setUp(self):

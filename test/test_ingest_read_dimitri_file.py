@@ -8,6 +8,9 @@ import unittest
 import dimitripy.ingest
 import dimitripy.base
 
+import os
+print(os.getcwd())
+
 
 class TestDimitriIngestDimitriFiles(unittest.TestCase):
     def setUp(self):
