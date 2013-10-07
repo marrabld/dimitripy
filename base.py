@@ -93,6 +93,14 @@ class DimitriObject:
                ' reflectance,' \
                ' reflectance_std'
 
+    def __getitem__(self, key):
+        if key == 'reflectance':
+            return self.reflectance
+        elif key == 'decimal_year':
+            return self.decimal_year
+        else:
+            raise KeyError(key)
+
 
 class SatelliteObject(DimitriObject):
     """
