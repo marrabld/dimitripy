@@ -4,6 +4,20 @@ __author__ = 'marrabld'
 This package holds the classes used for storing and accessing satellite data from 'dimitri objects'
 """
 
+import scipy
+
+class GLOBALS():
+    # Module global.  Used as default values, change with caution.
+    # don't change here.  Chaing in settings file.  TODO load at startup from settings
+    BANDS = {'PARASOL': [443, 490, 565, 670, 754, 760, 865, 910, 1020],
+         'MERIS': [412, 443, 490, 510, 560, 620, 665, 681, 708, 753, 761, 778, 865, 885, 900],
+         'VIIRS': [412, 445, 488, 555, 672, 746, 865, 1240, 1378, 1610, 2250],
+         'AATSR': [555, 660, 865, 1610, 3700, 10850, 12000],
+         'ATSR2': [555, 660, 865, 1610, 3700, 10850, 12000],
+         'MODISA': [412, 443, 487 ,530, 547, 666, 666, 677, 677, 746, 866, 904, 936, 935, 1383, 566, 554, 1242, 1629, 2114, 646, 856],  # TODO investigate this nonsense numbers came from DIMITIRv2
+         'VEGETATION': [450, 645, 835, 1665]
+         }  # The position in the list is the band number.
+    DTYPE = scipy.float64
 
 class DimitriObject:
     """
@@ -64,6 +78,20 @@ class DimitriObject:
         self.reflectance = meta_data['reflectance']
         self.reflectance_std = meta_data['reflectance_std']
 
+
+    def __str__(self):
+        return 'decimal_year,' \
+               ' sensor_zenith,' \
+               ' sensor_azimuth,' \
+               ' sun_zenith, sun_azimuth,' \
+               ' ozone, pressure,' \
+               ' relative_humidity,' \
+               ' wind_zonal,' \
+               ' wind_merid,' \
+               ' wvap, bands,' \
+               ' sensor_name,' \
+               ' reflectance,' \
+               ' reflectance_std'
 
 
 class SatelliteObject(DimitriObject):
