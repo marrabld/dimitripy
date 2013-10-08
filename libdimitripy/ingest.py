@@ -5,9 +5,9 @@ import scipy.io
 from scipy.io import netcdf
 import csv
 import re
-import dimitripy.base
+import libdimitripy.base
 
-DTYPE = dimitripy.base.GLOBALS.DTYPE
+DTYPE = libdimitripy.base.GLOBALS.DTYPE
 
 __author__ = 'marrabld'
 
@@ -27,7 +27,7 @@ class DimitriFiles():
         pass
 
     @staticmethod
-    def read_dimitri_sav_file(filename, sensor_name, bands=dimitripy.base.GLOBALS.BANDS):
+    def read_dimitri_sav_file(filename, sensor_name, bands=libdimitripy.base.GLOBALS.BANDS):
         """
         Reads the DIMITRIv2.sav files in the native IDL format.
 

@@ -6,9 +6,6 @@ import sys
 import matplotlib.pyplot as plt
 
 sys.path.append("..")
-import scipy
-
-import dimitripy.base
 
 
 class TimeSeriesIntercomparison():
@@ -82,7 +79,7 @@ class TimeSeriesIntercomparison():
                 ax_handle = plt.subplot(sub_num)
                 toa_ratio = self.comparison_object[parameter][band[b_iter, 1], start:end] / self.reference_object[
                                                                                                 parameter][
-                                                                                         band[b_iter, 0], start:end]
+                                                                                            band[b_iter, 0], start:end]
                 ##########
                 # draw the middle line around 1.
                 ##########
