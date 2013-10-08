@@ -68,7 +68,8 @@ class DimitriFiles():
     def read_dimitri_intercomparison_file(filename):
         """
         Reads the DIMITRIv2 generated intercomparison .csv files.  Creates two
-        dictionaries where the key is the parameters in the file for both sensors.
+        dictionaries where the key is the parameters in the file for both sensors.  The dictionaries should be used
+        to create DimitrtObjects
 
         @param filename: <String> The name of the file to read.
         @return: <list><dictionary> A python list of 2 dictionaries of the metadata
@@ -77,28 +78,38 @@ class DimitriFiles():
 
         meta_data = {'bands': []}  # Use this later to build the DimitriObject.
 
+        ##########
+        # Open the csv file and use some of the columns to define the DimitriObject keys.
+        # The rest of the row makes up the data for that key
+        ##########
         with open(filename, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=';')
             for r_index, row in enumerate(csv_reader):
-                if r_index == 0:
-                    # Skip the first row, its a header
+                if r_index < 3:
+                    # Skip the thre rows, its a header
                     tmp = row  # we don't need it.
                     del tmp
                 else:
-                    if r_index == 1:
+                    if r_index == 3:
                         # grab the sensor name only once
                         meta_data['sensor_name'] = row[1]
 
-                    if r_index > 1 and meta_data['sensor_name'] != row[
+                    if r_index > 2 and meta_data['sensor_name'] != row[
                         1]:  # we have moved through the file and on to the second sensor
                         r1_meta_data = meta_data
                         del meta_data
                         meta_data = {'bands': []}
                         meta_data['sensor_name'] = row[1]
 
+                    ##########
                     # The first few rows, will be all the metadata we need so we use them as the keys
                     # for the dictionary.  As long as it doesn't start with TOA*
-                    if 'TOA' in row[3] and 'REF' in row[3]:
+                    ##########
+
+                    ##########
+                    # Look at the substrings to tell if the data is TOA or the TOA standard deviation
+                    ##########
+                    if 'TOA_REF' in row[3] and not 'STD' in row[3]:
                         wave = re.findall(r'\d+', row[3])
                         meta_data['bands'].append(wave[0])  # Pulls the numbers out of the string
                         # Find the element in the list that the wave is and add the TOA
@@ -113,8 +124,10 @@ class DimitriFiles():
                             meta_data['reflectance'] = scipy.empty((1, len(row[4:])))
                             meta_data['reflectance'][wave_index, :] = scipy.asarray(row[4:],
                                                                                     dtype=DTYPE)  # wave_index should be 0
-
-                    elif 'TOA' in row[3] and 'STD' in row[3]:
+                    ##########
+                    # Look for the standard deviation here
+                    ##########
+                    elif 'TOA_REF' in row[3] and 'STD' in row[3]:
                         wave = re.findall(r'\d+', row[3])
                         meta_data['bands'].append(wave[0])  # Pulls the numbers out of the string
                         # Find the element in the list that the wave is and add the TOA
@@ -129,7 +142,10 @@ class DimitriFiles():
                             meta_data['reflectance_std'][wave_index, :] = scipy.asarray(row[4:],
                                                                                         dtype=DTYPE)  # wave_index should be 0
                     else:
-                        #  Need to translate the dialect so that the fields are the same as the keys
+                        ##########
+                        # Need to translate the dialect in the csv file so that the fields are the same as the keys
+                        # used in the DimitiriObjects
+                        ##########
 
                         if row[3] == 'VZA':
                             key = 'sensor_zenith'

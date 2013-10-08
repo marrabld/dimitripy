@@ -31,8 +31,9 @@ class TestDimitriIngestDimitriFiles(unittest.TestCase):
         assert isinstance(tmp_dict, scipy.io.netcdf_file), True
 
     def test_read_dimitri_intercomparison_file(self):
-        filename = '/home/marrabld/projects/DIMITRI_2.0/Output/DomeC_20130822_REF_MERIS_3rd_Reprocessing/RCAL_DomeC_VEGETATION_Calibration_1_REF_MERIS_3rd_Reprocessing.csv'
-        tmp_dict = dimitripy.ingest.DimitriFiles.read_dimitri_intercomparison_file(filename)
+        directory = '/home/marrabld/projects/DIMITRI_2.0/Output/SPG_20130418_REF_MERIS_2nd_Reprocessing'
+        filename = 'ED_SPG_MERIS_2nd_Reprocessing_PARASOL_Calibration_1.csv'
+        tmp_dict = dimitripy.ingest.DimitriFiles.read_dimitri_intercomparison_file(os.path.join(directory, filename))
         assert isinstance(tmp_dict[0], dict), True
         assert isinstance(tmp_dict[1], dict), True
 
