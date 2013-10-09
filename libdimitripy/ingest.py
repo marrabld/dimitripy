@@ -16,8 +16,6 @@ This package holds methods for reading in data files.
 """
 
 
-
-
 class DimitriFiles():
     """
     Class for reading in Dimitriv2 generated files
@@ -31,10 +29,10 @@ class DimitriFiles():
         """
         Reads the DIMITRIv2.sav files in the native IDL format.
 
-        @param filename: <String> The name of the file to read.
-        @param sensor_name: <String> The name of the sensor
-        @param bands: <dictionary>[<string>:<list>] The name:wavelength pair
-        @return: <dictionary> A python dictionary of the metadata
+        :param filename: <String> The name of the file to read.
+        :param sensor_name: <String> The name of the sensor
+        :param bands: <dictionary>[<string>:<list>] The name:wavelength pair
+        :return meta_data: <dictionary> A python dictionary of the metadata
         """
         meta_data = {}
         tmp_array = scipy.io.readsav(filename, python_dict=True)['sensor_l1b_ref']
@@ -71,8 +69,8 @@ class DimitriFiles():
         dictionaries where the key is the parameters in the file for both sensors.  The dictionaries should be used
         to create DimitrtObjects
 
-        @param filename: <String> The name of the file to read.
-        @return: <list><dictionary> A python list of 2 dictionaries of the metadata
+        :param filename: <String> The name of the file to read.
+        :return [r1_meta_data, meta_data]: <list><dictionary> A python list of 2 dictionaries of the metadata
 
         """
 

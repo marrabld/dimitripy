@@ -7,8 +7,10 @@ This package holds the classes used for storing and accessing satellite data fro
 import scipy
 
 class GLOBALS():
+    """
     # Module global.  Used as default values, change with caution.
     # don't change here.  Changing in settings file.  TODO load at startup from settings
+    """
     BANDS = {'PARASOL': [443, 490, 565, 670, 754, 760, 865, 910, 1020],
              'MERIS':   [412, 443, 490, 510, 560, 620, 665, 681, 708, 753, 761, 778, 865, 885, 900],
              'VIIRS':   [412, 445, 488, 555, 672, 746, 865, 1240, 1378, 1610, 2250],
@@ -60,7 +62,7 @@ class DimitriObject:
         reflectance
         reflectance_std
 
-        @param meta_data: A dictionary holding the metadata.
+        :param meta_data: A dictionary holding the metadata.
         """
         self.decimal_year = meta_data['decimal_year']
         self.sensor_zenith = meta_data['sensor_zenith']
