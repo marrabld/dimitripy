@@ -1,13 +1,16 @@
-from matplotlib.ticker import FormatStrFormatter
-
 __author__ = 'marrabld'
 
+import scipy
+import scipy.stats
+from matplotlib.ticker import FormatStrFormatter
 import sys
 import matplotlib.pyplot as plt
 import logger as log
+import libdimitripy.base
 
 lg = log.logger
-sys.path.append("..")
+sys.path.append("../..")
+DTYPE = libdimitripy.base.GLOBALS.DTYPE
 
 
 class TimeSeriesIntercomparison():
@@ -25,7 +28,7 @@ class TimeSeriesIntercomparison():
         self.reference_object = reference_dimitri_object
         self.comparison_object = comparison_dimitri_object
 
-    def plot_temporal_ratio(self, parameter, band, show=True, time='all'):
+    def plot_temporal_ratio(self, parameter, band, show=True, outlier_filter=2, time='all'):
         """
         Produces plots of the desired parameter by comparing a comparison dimitri object
         with a reference object.  The band input parameter must be an int or a 2D Numpy array
@@ -35,11 +38,12 @@ class TimeSeriesIntercomparison():
         :param parameter: <string> DimitriObject parameter to compare (currently only reflectance is tested)
         :param band: <Numpy int> or <2D Numpy array> Numpy array with the bands to compare asarray([[reference], [comparison]])
         :param show: <bool> if set to true figure will be displayed on the screen TODO add save as option
+        :param outlier_filter: <float> The number of standard deviations to filter out of the TOA ratio
         :param time: not used atm
         :return figure_handle, axes_handle: <matplotlib>  Can be used to change the plot parameters.
         """
 
-        decimal_year = self.reference_object['decimal_year']
+        decimal_year = scipy.asarray(self.reference_object['decimal_year'], dtype=DTYPE)
         fig_handle, ax_handle = plt.subplots()
 
         ##########
@@ -82,20 +86,54 @@ class TimeSeriesIntercomparison():
                 toa_ratio = self.comparison_object[parameter][band[b_iter, 1], start:end] / self.reference_object[
                                                                                                 parameter][
                                                                                             band[b_iter, 0], start:end]
+
                 ##########
                 # draw the middle line around 1.
                 ##########
                 y = [1, 1]
                 x = [decimal_year[0], decimal_year[-1]]
-                plt.plot(x, y, 'r--')
+                plt.plot(x, y, 'k--')
+
+                ##########
+                # Find the mean and standard deviation of the toa_ratio and add it to he legend
+                ##########
+                mean_toa_ratio = scipy.mean(toa_ratio)
+                std_toa_ratio = scipy.std(toa_ratio)
+
+                #########
+                #  Filter out any outliers that deviate more or less than defined by the method input parameter
+                #########
+                filter_index = (toa_ratio > (mean_toa_ratio - std_toa_ratio * outlier_filter)) & (toa_ratio < (
+                    mean_toa_ratio + std_toa_ratio * outlier_filter))
+
+
+                filtered_decimal_year = decimal_year[filter_index]
+                toa_ratio = toa_ratio[filter_index]
+
+                ##########
+                # Fit a curve (linear fit)
+                ##########
+                slope, intercept, r_value, p_value, std_error = scipy.stats.linregress(filtered_decimal_year, toa_ratio)
+
+                textstr = '$\mu=%.2f$\n$\sigma=%.2f$\n$\mathrm{m}=%.2f$, $\mathrm{c}=%.2f$ \n $\mathrm{r^2}=%.2f$' % (
+                    mean_toa_ratio, std_toa_ratio, slope, intercept, r_value ** 2)
+
+                # these are matplotlib.patch.Patch properties
+                props = dict(boxstyle='round', facecolor='wheat', alpha=0.75)
+
+                # place a text box in upper left in axes coords
+                ax_handle.text(0.05, 0.95, textstr, transform=ax_handle.transAxes, fontsize=14,
+                               verticalalignment='top', bbox=props)
+
 
                 ##########
                 # Set the default plot parameters
                 ##########
                 plt.title(self.reference_object.bands[band[b_iter, 0]] + ' nm')
                 plt.ylabel(r'$\frac{R}{R_{ref}}$')
-                ax_handle.plot(decimal_year, toa_ratio, '*')
+                ax_handle.plot(filtered_decimal_year, toa_ratio, '*')
                 ax_handle.xaxis.set_major_formatter(FormatStrFormatter('%1.1f'))
+                ax_handle.set_ylim([0.85, 1.15])  # Todo move to kwargs
 
             plt.xlabel('Decimal Year')
 
