@@ -20,6 +20,7 @@ class GLOBALS():
              'VEGETATION': [450, 645, 835, 1665]
              }  # The position in the list is the band number.
     DTYPE = scipy.float64
+    DEBUG_LEVEL = 'DEBUG'
 
 class DimitriObject:
     """
@@ -85,7 +86,8 @@ class DimitriObject:
         return 'decimal_year,' \
                ' sensor_zenith,' \
                ' sensor_azimuth,' \
-               ' sun_zenith, sun_azimuth,' \
+               ' sun_zenith,' \
+               ' sun_azimuth,' \
                ' ozone, pressure,' \
                ' relative_humidity,' \
                ' wind_zonal,' \
@@ -100,6 +102,10 @@ class DimitriObject:
             return self.reflectance
         elif key == 'decimal_year':
             return self.decimal_year
+        elif key == 'sun_zenith':
+            return self.sun_zenith
+        elif key == 'sensor_name':
+            return self.sensor_name
         else:
             raise KeyError(key)
 

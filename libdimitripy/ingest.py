@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../..")
-
+import logger as log
 import scipy.io
 from scipy.io import netcdf
 import csv
@@ -8,6 +8,10 @@ import re
 import libdimitripy.base
 
 DTYPE = libdimitripy.base.GLOBALS.DTYPE
+DEBUG_LEVEL = libdimitripy.base.GLOBALS.DEBUG_LEVEL
+lg = log.logger
+lg.setLevel(DEBUG_LEVEL)
+sys.path.append("../..")
 
 __author__ = 'marrabld'
 
