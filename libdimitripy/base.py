@@ -85,7 +85,6 @@ class DimitriObject:
         self.reflectance_std = meta_data['reflectance_std']
 
 
-
     def __str__(self):
         return 'decimal_year,' \
                ' sensor_zenith,' \

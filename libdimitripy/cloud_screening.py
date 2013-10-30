@@ -1,16 +1,23 @@
+from scipy.optimize import optimize
+
 __author__ = 'marrabld'
 
 import scipy
-import scipy.stats
+import os
 import sys
 import logger as log
 import libdimitripy.base
 import scipy.ndimage
+import ConfigParser
 
 DTYPE = libdimitripy.base.GLOBALS.DTYPE
 DEBUG_LEVEL = libdimitripy.base.GLOBALS.DEBUG_LEVEL
 lg = log.logger
 lg.setLevel(DEBUG_LEVEL)
+config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'configuration.conf')
+config = ConfigParser.ConfigParser()
+config.read(config_file)
+
 sys.path.append("../..")
 
 
@@ -54,17 +61,6 @@ class CKMethod():
         self.partly_cloudy_images = ''
         self.cloudy_images = ''
 
-    def __init__(self, clear_images, partly_cloudy_images, cloudy_images):
-        """
-        Optional constructor
-
-
-        @param clear_images: 3D array of clear sky images
-        @param partly_cloudy_images: 3D array of partly cloudy images
-        @param cloudy_images: 3D array of cloudy images
-        @return:
-        """
-        pass
 
     def define_training_images(self, clear_images, partly_cloudy_images, cloudy_images):
         """
@@ -76,7 +72,11 @@ class CKMethod():
         @return:
         """
 
-    def train_model(self):
+        self.clear_images = scipy.asarray(clear_images)
+        self.partly_cloudy_images = scipy.asarray(partly_cloudy_images)
+        self.cloudy_images = scipy.asarray(cloudy_images)
+
+    def train_model(self, update_config=True):
         """
 
         Model is A*exp(b) where model [A, b]
@@ -84,9 +84,9 @@ class CKMethod():
         @return:
         """
 
-        clear_model = scipy.zeros(1, 1)  # initialise an empty vector
-        partly_cloudy_model = scipy.zeros(1, 1)
-        cloudy_model = scipy.zeros(1, 1)
+        clear_model = scipy.zeros((1, 2), dtype=DTYPE)  # initialise an empty vector
+        partly_cloudy_model = scipy.zeros((1, 2), dtype=DTYPE)
+        cloudy_model = scipy.zeros((1, 2), dtype=DTYPE)
 
         models = [clear_model, partly_cloudy_model, cloudy_model]
         images = [self.clear_images, self.partly_cloudy_images, self.cloudy_images]
@@ -96,33 +96,85 @@ class CKMethod():
         #  repeat while increasing the interpolation size up to the original size.
         ##########
 
-        for model in models:
-            for image in images:
-                model = scipy.hstack([model, self.process_image(image)])
+        for i_iter, model in enumerate(models):
+            #for image in images:
+            mean, std, window = self.process_image(images[i_iter])
+            tmp_model = self.fit_model(window, std)
+            model = scipy.vstack([model, tmp_model])
+
+            ##########
+            #  model should be a vstacked pair of values.
+            #  average through them and use the average value as the trained value
+            ##########
+
+            if i_iter == 0:
+                clear_model = scipy.mean(model, axis=0)
+            elif i_iter == 1:
+                partly_cloudy_model = scipy.mean(model, axis=0)
+            elif i_iter == 2:
+                cloudy_model = scipy.mean(model, axis=0)
+            else:
+                lg.error('Error training model, model enumeration > 3')
+
+        if update_config:
+            config.set('cloud_screening_ckmethod', 'a_clear_model', cloudy_model[0])
+            config.set('cloud_screening_ckmethod', 'b_clear_model', cloudy_model[1])
+            config.set('cloud_screening_ckmethod', 'a_partly_cloudy_model', partly_cloudy_model[0])
+            config.set('cloud_screening_ckmethod', 'b_partly_cloudy_model', partly_cloudy_model[1])
+            config.set('cloud_screening_ckmethod', 'a_cloudy_model', cloudy_model[0])
+            config.set('cloud_screening_ckmethod', 'b_cloudy_model', cloudy_model[1])
+            lg.debug(config.write(sys.stdout))
+            config.write()
+
+        return [clear_model, partly_cloudy_model, cloudy_model]
 
 
     def process_image(self, image):
         """
 
+
+        @rtype : object
         @param image:
         @return:
         """
         image_size = image.shape
-        image_mean = scipy.zeros(1)
-        image_std = scipy.zeros(1)
+        image_mean = scipy.zeros(1, dtype=DTYPE)
+        image_std = scipy.zeros(1, dtype=DTYPE)
 
         ##########
         #  resample the image to a 2x2 image and calculate stats
         #  repeat while increasing the interpolation size up to the original size.
         ##########
 
-        for i_iter in range(0, image_size[0] - 1):  # this will likely only work for square images for now.  TODO fix
-            zoom_factor = 1 / (image_size[0] - i_iter)  # square only
+        for i_iter in range(1, image_size[0]):  # this will likely only work for square images for now.  TODO fix
+            zoom_factor = float(i_iter) / float(image_size[0])  # square only
             interp_image = scipy.ndimage.zoom(image, zoom_factor)
-            image_mean = scipy.hstack(image_mean, scipy.mean(interp_image))
-            image_std = scipy.hstack(image_std, scipy.std(interp_image))
+            image_mean = scipy.hstack((image_mean, scipy.mean(interp_image)))
+            image_std = scipy.hstack((image_std, scipy.std(interp_image)))
 
-        return image_mean, image_std
+        window_size = scipy.linspace(0, image_size[0], image_size[0])
+        return image_mean, image_std, window_size
+
+    def fit_model(self, std, window_size):
+        """
+
+        TODO kwargs the initial guesses
+
+        @return:
+        """
+        lg.debug('Fitting curve, CKMethod')
+        x = window_size
+        y = std
+
+        fitfunc = lambda p, x: p[0] * x ** p[1]  # Target function
+        errfunc = lambda p, x, y: fitfunc(p, x) - y  # Distance to the target function
+        p0 = [10, 1]  # Initial guess for the parameters
+        p1, success = scipy.optimize.leastsq(errfunc, p0[:], args=(x, y))
+        lg.info('Fit success = ' + str(success))
+        if success == 5:
+            lg.error('Fit not found!!')
+
+        return p1
 
 
     def score_image(self, image):
