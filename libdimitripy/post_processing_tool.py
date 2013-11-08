@@ -98,6 +98,7 @@ class TimeSeriesIntercomparison():
                                                                                              band[b_iter, 0],
                                                                                              start:end]) / \
                             self.reference_object[parameter][band[b_iter, 0], start:end]
+                toa_ratio[scipy.isinf(toa_ratio)] = 0
                 toa_ratio *= 100  # Make it percentage
 
                 ##########
@@ -156,9 +157,10 @@ class TimeSeriesIntercomparison():
                 ##########
                 # Set the default plot parameters
                 ##########
-                plt.title(self.reference_object.bands[band[b_iter, 0]] + ' nm')
-                plt.ylabel(r'$\frac{' + self.comparison_object['sensor_name'] + '-' + self.reference_object[
-                    'sensor_name'] + '}{' + self.reference_object['sensor_name'] + '}$' + '% of TOA reflectance')
+                plt.title(str(self.reference_object.bands[band[b_iter, 0]]) + ' nm')
+                #plt.ylabel(r'$\frac{' + self.comparison_object['sensor_name'] + '-' + self.reference_object[
+                #    'sensor_name'] + '}{' + self.reference_object['sensor_name'] + '}$' + '% of TOA reflectance')
+                plt.ylabel(r'$\frac{' + self.comparison_object['sensor_name'] + '-' + 'BRDF' + '}{' + 'BRDF' + '}$' + '% of TOA reflectance')
                 ax_handle.plot(filtered_decimal_year, toa_ratio, '*')
                 ax_handle.xaxis.set_major_formatter(FormatStrFormatter('%1.1f'))
                 #ax_handle.set_ylim(ylim)

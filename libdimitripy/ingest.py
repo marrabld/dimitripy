@@ -45,7 +45,7 @@ class DimitriFiles():
         meta_data['num_bands'] = len(meta_data['bands'])
         meta_data['decimal_year'] = tmp_array[:, 0]
         meta_data['sensor_zenith'] = tmp_array[:, 1]
-        meta_data['sensor_azimuth'] = tmp_array[:, 2]
+        meta_data['sensor_zenith'] = tmp_array[:, 2]
         meta_data['sun_zenith'] = tmp_array[:, 3]
         meta_data['sun_azimuth'] = tmp_array[:, 4]
         meta_data['ozone'] = tmp_array[:, 5]
@@ -152,7 +152,7 @@ class DimitriFiles():
                         if row[3] == 'VZA':
                             key = 'sensor_zenith'
                         elif row[3] == 'VAA':
-                            key = 'sensor_azimuth'
+                            key = 'sensor_zenith'
                         elif row[3] == 'SZA':
                             key = 'sun_zenith'
                         elif row[3] == 'SAA':

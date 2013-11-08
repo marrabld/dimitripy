@@ -18,7 +18,7 @@ class GLOBALS():
              'AATSR': [555, 660, 865, 1610, 3700, 10850, 12000],
              'ATSR2': [555, 660, 865, 1610, 3700, 10850, 12000],
              'MODISA': [412, 443, 487, 530, 547, 666, 666, 677, 677, 746, 866, 904, 936, 935, 1383, 566, 554, 1242,
-                        1629, 2114, 646, 856], # TODO investigate this nonsense numbers came from DIMITIRv2
+                        1629, 2114, 646, 856],
              'VEGETATION': [450, 645, 835, 1665]
     }  # The position in the list is the band number.
     DTYPE = scipy.float64
@@ -31,6 +31,10 @@ class DimitriObject:
     """
 
     def __init__(self):
+        """
+
+        @rtype : object
+        """
         self.decimal_year = None
         self.sensor_zenith = None
         self.sensor_azimuth = None
@@ -52,7 +56,7 @@ class DimitriObject:
         Optional constructor method to define fields from a dictionary.  Required fields are
         decimal_year
         sensor_zenith
-        sensor_azimuth
+        sensor_zenith
         sun_zenith
         sun_azimuth
         ozone
@@ -70,7 +74,7 @@ class DimitriObject:
         """
         self.decimal_year = meta_data['decimal_year']
         self.sensor_zenith = meta_data['sensor_zenith']
-        self.sensor_azimuth = meta_data['sensor_azimuth']
+        self.sensor_azimuth = meta_data['sensor_zenith']
         self.sun_zenith = meta_data['sun_zenith']
         self.sun_azimuth = meta_data['sun_azimuth']
         self.ozone = meta_data['ozone']
@@ -88,7 +92,7 @@ class DimitriObject:
     def __str__(self):
         return 'decimal_year,' \
                ' sensor_zenith,' \
-               ' sensor_azimuth,' \
+               ' sensor_zenith,' \
                ' sun_zenith,' \
                ' sun_azimuth,' \
                ' ozone, pressure,' \
@@ -111,6 +115,18 @@ class DimitriObject:
             return self.sensor_name
         else:
             raise KeyError(key)
+
+    def relative_azimuth(self):
+        """
+        Returns the relative azimuth angle between the sun and sensor.  Checks the angles are sane.
+        TODO write a unit test for this.
+        """
+        raa = scipy.absolute(self.sun_azimuth, self.sensor_azimuth)
+        idx = raa > 180.0
+        raa[idx] = 360.0 - raa[idx]
+
+        return raa
+
 
 
 class SatelliteObject(DimitriObject):

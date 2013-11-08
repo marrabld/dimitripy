@@ -3,12 +3,15 @@ from scipy.optimize import optimize
 __author__ = 'marrabld'
 
 import scipy
+import scipy.linalg
+import scipy.signal
 import os
 import sys
 import logger as log
 import libdimitripy.base
 import scipy.ndimage
 import ConfigParser
+import pickle
 
 DTYPE = libdimitripy.base.GLOBALS.DTYPE
 DEBUG_LEVEL = libdimitripy.base.GLOBALS.DEBUG_LEVEL
@@ -76,10 +79,10 @@ class CKMethod():
         self.partly_cloudy_images = scipy.asarray(partly_cloudy_images)
         self.cloudy_images = scipy.asarray(cloudy_images)
 
-    def train_model(self, update_config=True):
+    def train_model(self, update_cache=True):
         """
 
-        Model is A*exp(b) where model [A, b]
+        Model is A*x**b) where model [A, b]
 
         @return:
         """
@@ -116,15 +119,19 @@ class CKMethod():
             else:
                 lg.error('Error training model, model enumeration > 3')
 
-        if update_config:
-            config.set('cloud_screening_ckmethod', 'a_clear_model', cloudy_model[0])
-            config.set('cloud_screening_ckmethod', 'b_clear_model', cloudy_model[1])
+        if update_cache:
+            config.set('cloud_screening_ckmethod', 'a_clear_model', clear_model[0])
+            config.set('cloud_screening_ckmethod', 'b_clear_model', clear_model[1])
             config.set('cloud_screening_ckmethod', 'a_partly_cloudy_model', partly_cloudy_model[0])
             config.set('cloud_screening_ckmethod', 'b_partly_cloudy_model', partly_cloudy_model[1])
             config.set('cloud_screening_ckmethod', 'a_cloudy_model', cloudy_model[0])
             config.set('cloud_screening_ckmethod', 'b_cloudy_model', cloudy_model[1])
             lg.debug(config.write(sys.stdout))
-            config.write()
+            pickle_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache/ck_cloud.p')
+            print(pickle_file)
+            pickle.dump([clear_model, partly_cloudy_model, cloudy_model],
+                        open(pickle_file, "wb"))
+            #config.write()
 
         return [clear_model, partly_cloudy_model, cloudy_model]
 
@@ -152,7 +159,24 @@ class CKMethod():
             image_mean = scipy.hstack((image_mean, scipy.mean(interp_image)))
             image_std = scipy.hstack((image_std, scipy.std(interp_image)))
 
-        window_size = scipy.linspace(0, image_size[0], image_size[0])
+        window_size = scipy.linspace(0, image_size[0] - 2, image_size[0] - 2)
+
+        ## work around, trim the starting zero from the beginning.
+        image_mean = image_mean[2:]
+        image_std = image_std[2:]
+
+
+        # zero scale the vectors
+        image_mean = image_mean - min(image_mean)
+        image_std = image_std - min(image_std)
+        image_mean = scipy.signal.medfilt(image_mean, 3)
+        image_std = scipy.signal.medfilt(image_std, 3)
+
+        #!!!! for testing
+        import pylab
+        pylab.plot(window_size, image_std)
+        pylab.show()
+
         return image_mean, image_std, window_size
 
     def fit_model(self, std, window_size):
@@ -167,10 +191,11 @@ class CKMethod():
         y = std
 
         fitfunc = lambda p, x: p[0] * x ** p[1]  # Target function
-        errfunc = lambda p, x, y: fitfunc(p, x) - y  # Distance to the target function
-        p0 = [10, 1]  # Initial guess for the parameters
+        errfunc = lambda p, x, y: scipy.absolute(fitfunc(p, x) - y)  # Distance to the target function
+        p0 = [1, 1]  # Initial guess for the parameters
         p1, success = scipy.optimize.leastsq(errfunc, p0[:], args=(x, y))
         lg.info('Fit success = ' + str(success))
+        lg.debug('[A, b] : ' + str(p1))
         if success == 5:
             lg.error('Fit not found!!')
 
@@ -178,5 +203,43 @@ class CKMethod():
 
 
     def score_image(self, image):
-        pass
+        """
+        This finds weather the image is cloudy or not.
+
+        @param image:
+        @return:
+        """
+
+        pickle_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache/ck_cloud.p')
+
+        # Load the cloud thresholds
+        [cloudy_model, partly_cloudy_model, clear_model] = pickle.load(open(pickle_file, "rb"))
+
+        mean, std, window_size = self.process_image(image)
+        p = self.fit_model(window_size, std)
+        #p = self.fit_model(window_size, mean)
+
+        # rebuild the functions of the window range,
+        # find the residual vector and then the euclidean norm.
+        # the one with the smallest should be the model.
+
+        fitfunc = lambda p, x: p[0] * x ** p[1]
+
+        clear_residual = scipy.absolute(fitfunc(p, window_size) - fitfunc(clear_model, window_size))
+        pc_residual = scipy.absolute(fitfunc(p, window_size) - fitfunc(partly_cloudy_model, window_size))
+        cloudy_residual = scipy.absolute(fitfunc(p, window_size) - fitfunc(cloudy_model, window_size))
+
+        clear_norm = scipy.linalg.norm(clear_residual)
+        pc_norm = scipy.linalg.norm(pc_residual)
+        cloudy_norm = scipy.linalg.norm(cloudy_residual)
+
+        smallest_val = [clear_norm, pc_norm, cloudy_norm].index(min([clear_norm, pc_norm, cloudy_norm]))
+        lg.debug('score :: ' + str(smallest_val))
+
+        return smallest_val
+
+
+    def find_nearest(self, a, a0):
+        idx = scipy.abs(a - a0).argmin()
+        return a.flat[idx]
 
