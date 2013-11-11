@@ -15,7 +15,9 @@ sys.path.append("../..")
 
 class RoujeanBRDF():
     """
-    Class for calculating the Roujean BRDF coefficients.
+    Class for calculating the Roujean BRDF coefficients.  Bassed on Roujean (1992).  A Bidrectional Reflectande Model
+    of the Earth's Surface fo the Correction of Remote Sensing Data
+
     """
 
     def __init__(self):
@@ -23,13 +25,15 @@ class RoujeanBRDF():
 
     def calc_kernel_f1(self, sun_zenith, sensor_zenith, relative_azimuth):
         """
+        Calculates the F1 Kernel from Roujean (1992)
 
-        @param sun_zenith:
-        @param sensor_zenith:
-        @param relative_azimuth:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @return: <numpy> Roujean F1 kernel
         """
 
+        lg.debug("Calculating F1 kernel")
         # Just a bit of syntax candy
         # Do it in here so it goes out of scope after the method call
         cos = scipy.cos
@@ -41,10 +45,8 @@ class RoujeanBRDF():
             tan(sun_zenith) ** 2 + tan(sensor_zenith) ** 2 - 2 * tan(sensor_zenith) * tan(sun_zenith) * cos(
                 relative_azimuth))
 
-        kernel_f1 = 1 / (2.0 * scipy.pi) * ((
-                                                (scipy.pi - relative_azimuth) * cos(relative_azimuth) + sin(
-                                                    relative_azimuth)) * tan(sun_zenith) * tan(
-            sensor_zenith))
+        kernel_f1 = 1 / (2.0 * scipy.pi) * (((scipy.pi - relative_azimuth) * cos(relative_azimuth) + sin(
+            relative_azimuth)) * tan(sun_zenith) * tan(sensor_zenith))
 
         kernel_f1 -= (1 / scipy.pi) * (tan(sun_zenith) + tan(sensor_zenith) + delta)
 
@@ -52,13 +54,15 @@ class RoujeanBRDF():
 
     def calc_kernel_f2(self, sun_zenith, sensor_zenith, relative_azimuth):
         """
+        Calculates the F2 Kernel from Roujean (1992)
 
-        @param sun_zenith:
-        @param sensor_zenith:
-        @param relative_azimuth:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @return: <numpy> Roujean F2 kernel
         """
 
+        lg.debug("Calculating F2 kernel")
         # Just a bit of syntax candy
         # Do it in here so it goes out of scope after the method call
         cos = scipy.cos
@@ -76,12 +80,13 @@ class RoujeanBRDF():
 
     def calc_roujean_coeffs(self, sun_zenith, sensor_zenith, relative_azimuth, reflectance):
         """
+        Calculates the Roujean coefficients k0, k1 and k2
 
-        @param sun_zenith:
-        @param sensor_zenith:
-        @param relative_azimuth:
-        @param reflectance:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @param reflectance: <numpy> array of reflectance (TOA in the case of dimitripy)
+        @return: k_coeff.T, residual, rank, singular_values: <numpy>
         """
 
         # Remove any values that have -999 for the reflectance.
@@ -109,12 +114,13 @@ class RoujeanBRDF():
 
     def model_brdf(self, sun_zenith, sensor_zenith, relative_azimuth, k_coeff):
         """
+        Calculates the reflectance given the viewing geometry and the Roujean k coefficients.
 
-        @param sun_zenith:
-        @param sensor_zenith:
-        @param relative_azimuth:
-        @param k_coeff:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @param k_coeff: <numpy> (n, 3) array of Roujean coefficients k0m k1 and k2 respectively
+        @return brdf: <numpy> array of reflectance values
         """
 
         lg.debug('Calculating Roujean BRDF')
@@ -127,16 +133,18 @@ class RoujeanBRDF():
                               end_date,
                               bin_days=20):
         """
+        Calculates the Roujean modelled reflectance over a time series.  bin_days is used to calculate the a 'rolling'
+        brdf using the data points in the time bin.
 
-        @param sun_zenith:
-        @param sensor_zenith:
-        @param relative_azimuth:
-        @param reflectance:
-        @param decimal_year:
-        @param start_date:
-        @param end_date:
-        @param bin_days:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @param reflectance: <numpy> array of reflectance values
+        @param decimal_year: <numpy> array of time in decimal years
+        @param start_date: start date decimal years
+        @param end_date: end date in decimal years
+        @param bin_days: number of days to calculate the brdf over.
+        @return: k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
         """
 
         #  TODO:  sort out resampling of and averaging of data here.
@@ -154,7 +162,9 @@ class RoujeanBRDF():
         num_days = scipy.absolute((end_date - start_date))  # * 365.0)
         num_aquired = scipy.ceil(num_days / (bin_days))
 
+        ##########
         #  preallocate the arrays.
+        ##########
         k_coeff = scipy.zeros((num_aquired, 3))
         brdf = scipy.zeros(1)
         brdf_uncertainty_r = scipy.zeros(num_aquired)
@@ -173,15 +183,17 @@ class RoujeanBRDF():
                                                                                            reflectance[bin_idx])
             #for j_iter in range(0, count(bin_idx)):
             temp = self.model_brdf(sun_zenith[bin_idx], sensor_zenith[bin_idx],
-                                                       relative_azimuth[bin_idx],
-                                                       k_coeff[i_iter, :])
+                                   relative_azimuth[bin_idx],
+                                   k_coeff[i_iter, :])
             brdf = scipy.hstack((brdf, temp))
             #brdf[int(i_iter * bin_days):int(sun_zenith[bin_idx].shape[0])] = temp
 
             roujean_reflectance = scipy.mean(brdf)
 
+            ##########
             #  Calculate the error statistics
             #  Doing this the same as DIMITRIv2 for consistency
+            ##########
             roujean_diff = reflectance - roujean_reflectance
             brdf_std[i_iter] = scipy.std(roujean_diff)
             rmse = scipy.sqrt(scipy.sum(roujean_diff ** 2) / roujean_diff.shape[0])
@@ -192,16 +204,17 @@ class RoujeanBRDF():
             mid_time = scipy.mean(time)  # TODO this in nonsense, fix tlater
             resampled_time[i_iter] = mid_time
 
-        return k_coeff, resampled_time, brdf,  brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
+        return k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
 
 
     def normalise_reflectance(self, sun_zenith, relative_azimuth, k_coeffs):
         """
         Normalises the reflectance to nadir given the roujean coefficients.
 
-        @param reflectance:
-        @param k_coeffs:
-        @return:
+        @param sun_zenith: <numpy> array of sun zenith angles in radians.
+        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        @param k_coeffs: <numpy> (1, 3) array of Roujean coefficients k0, k1 and k2 respectively
+        @return brdf: <numpy> reflectance at nadir
         """
 
         sensor_zenith = scipy.zeros(sun_zenith.shape)
@@ -211,8 +224,10 @@ class RoujeanBRDF():
 
     def save_coeffs(self, filename, k_coeff):
         """
+        This will save the numpy array to a csv file.  Will work with any numpy array.
 
-        @param filename:
+        @param filename: <string> The name and path of the file to be saved
+        @param k_coeff: <numpy> The array to be saved
         @return:
         """
         lg.info('Writing k_coeffs to file :: ' + filename)

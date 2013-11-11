@@ -17,8 +17,9 @@ sys.path.append("../..")
 
 class TimeSeriesIntercomparison():
     """
-    USed for Intercomparing simulated reflectances with actual reflectances.  Class requires 2 DimitriObjects.  Once refered to as the reference object and
-    one referred to as the comparison object.  These should be passed through the constructor (reference, comparison).  The reference sensor is always used
+    USed for Intercomparing simulated reflectances with actual reflectances.  Class requires 2 DimitriObjects.
+    Once refered to as the reference object and one referred to as the comparison object.
+    These should be passed through the constructor (reference, comparison).  The reference sensor is always used
     as the first in any list.
     """
 
@@ -160,7 +161,8 @@ class TimeSeriesIntercomparison():
                 plt.title(str(self.reference_object.bands[band[b_iter, 0]]) + ' nm')
                 #plt.ylabel(r'$\frac{' + self.comparison_object['sensor_name'] + '-' + self.reference_object[
                 #    'sensor_name'] + '}{' + self.reference_object['sensor_name'] + '}$' + '% of TOA reflectance')
-                plt.ylabel(r'$\frac{' + self.comparison_object['sensor_name'] + '-' + 'BRDF' + '}{' + 'BRDF' + '}$' + '% of TOA reflectance')
+                plt.ylabel(r'$\frac{' + self.comparison_object[
+                    'sensor_name'] + '-' + 'BRDF' + '}{' + 'BRDF' + '}$' + '% of TOA reflectance')
                 ax_handle.plot(filtered_decimal_year, toa_ratio, '*')
                 ax_handle.xaxis.set_major_formatter(FormatStrFormatter('%1.1f'))
                 #ax_handle.set_ylim(ylim)
