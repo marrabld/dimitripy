@@ -111,15 +111,13 @@ else:
     reference_dimitri_object.decimal_year = reference_dimitri_object.decimal_year[idx]
     reference_dimitri_object.sun_zenith = reference_dimitri_object.sun_zenith[idx]
     reference_dimitri_object.sensor_zenith = reference_dimitri_object.sensor_zenith[idx]
-    reference_dimitri_object.bands = ['560','665','865']
+    reference_dimitri_object.bands = ['560', '665', '865']
 
     reference_dimitri_object.reflectance = reference_dimitri_object.reflectance.T
     comparison_dimitri_object.reflectance = comparison_dimitri_object.reflectance.T
 
     ts_comp = libdimitripy.post_processing_tool.TimeSeriesIntercomparison(reference_dimitri_object,
                                                                           comparison_dimitri_object)
-    #print(reference_dimitri_object.reflectance.shape)
-    #print(comparison_dimitri_object.reflectance.shape)
 
     f, a = ts_comp.plot_temporal_ratio('reflectance', scipy.asarray([meris_bands, comparison_bands]).T, show=False)
     f.set_size_inches(15, 12)

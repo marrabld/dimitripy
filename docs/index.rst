@@ -14,6 +14,8 @@ Database for Imaging Mulit-spectral Instruments and Tools for Radiometric Interc
 Overview
 --------
 
+DIMITRIPY is a python implimentation of DIMITRI
+
 The DIMITRI software package contains a suite of IDL routines for the intercomparison of Top Of
 Atmosphere (TOA) radiance and reflectance values within the 400nm - 4μm wavelength range; this
 is generally known as Level 1b Earth Observation (EO) satellite data. The package includes product
@@ -29,26 +31,15 @@ can be ingested into DIMITRI to allow even greater temporal and spatial analysis
 System Requirements
 -------------------
 
-A full IDL license is NOT required for DIMITRI V2.0; the freely available IDL Virtual Machine
-(available at http://www.ittvis.com/ProductsServices/IDL/IDLModules/IDLVirtualMachine.aspx) will
-allow use of the pre-compiled DIMITRI package and use of the full functionalities accessible from the
-HMI.
+DIMITRIPY is a reimplimentation of DIMITRI which was originally
+Python and Scipy.
 
-DIMITRI has been developed to be compatible on both Linux and Windows based systems; however,
-MAC compatibility cannot be guaranteed. DIMITRI has been developed for use with IDL 7.1 or
-higher; the minimum requirements required for IDL 7.1 are therefore the minimum requirements for
-running DIMITRI.
 
-A full IDL license (http://www.ittvis.com) will allow command line usage, modification of routines
-and recompilation of the software package.
 
 How to use DIMITRI
 ------------------
 
-Following extraction, DIMITRI is now ready to be utilised, this can be achieved by:
-* On Windows: Double clicking the “DIMITRI_V2.0.sav” file, or running IDL runtime and
-selecting the file
-* On Linux: Typing “idl –vm=DIMITRI_V2.0.sav”
+Easy
 
 DIMITRI Team
 ------------------
@@ -78,8 +69,15 @@ Indices and tables
 .. automodule:: dimitripy.libdimitripy.post_processing_tool
     :members:
 
+.. automodule:: dimitripy.libdimitripy.brdf
+    :members:
+
+.. automodule:: dimitripy.libdimitripy.cloud_screening
+    :members:
+
 .. automodule:: dimitripy.libdimitripy.ingest
     :members:
 
-
+.. automodule:: dimitripy.libdimitripy.helper_functions
+    :members:
 

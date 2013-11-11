@@ -27,10 +27,10 @@ class RoujeanBRDF():
         """
         Calculates the F1 Kernel from Roujean (1992)
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @return: <numpy> Roujean F1 kernel
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        return: <numpy> Roujean F1 kernel
         """
 
         lg.debug("Calculating F1 kernel")
@@ -56,10 +56,10 @@ class RoujeanBRDF():
         """
         Calculates the F2 Kernel from Roujean (1992)
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @return: <numpy> Roujean F2 kernel
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        return: <numpy> Roujean F2 kernel
         """
 
         lg.debug("Calculating F2 kernel")
@@ -82,11 +82,11 @@ class RoujeanBRDF():
         """
         Calculates the Roujean coefficients k0, k1 and k2
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @param reflectance: <numpy> array of reflectance (TOA in the case of dimitripy)
-        @return: k_coeff.T, residual, rank, singular_values: <numpy>
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        :param reflectance: <numpy> array of reflectance (TOA in the case of dimitripy)
+        return: k_coeff.T, residual, rank, singular_values: <numpy>
         """
 
         # Remove any values that have -999 for the reflectance.
@@ -116,11 +116,11 @@ class RoujeanBRDF():
         """
         Calculates the reflectance given the viewing geometry and the Roujean k coefficients.
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @param k_coeff: <numpy> (n, 3) array of Roujean coefficients k0m k1 and k2 respectively
-        @return brdf: <numpy> array of reflectance values
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        :param k_coeff: <numpy> (n, 3) array of Roujean coefficients k0m k1 and k2 respectively
+        return brdf: <numpy> array of reflectance values
         """
 
         lg.debug('Calculating Roujean BRDF')
@@ -136,15 +136,15 @@ class RoujeanBRDF():
         Calculates the Roujean modelled reflectance over a time series.  bin_days is used to calculate the a 'rolling'
         brdf using the data points in the time bin.
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param sensor_zenith: <numpy> array of sensor zenith angles in radians
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @param reflectance: <numpy> array of reflectance values
-        @param decimal_year: <numpy> array of time in decimal years
-        @param start_date: start date decimal years
-        @param end_date: end date in decimal years
-        @param bin_days: number of days to calculate the brdf over.
-        @return: k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param sensor_zenith: <numpy> array of sensor zenith angles in radians
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        :param reflectance: <numpy> array of reflectance values
+        :param decimal_year: <numpy> array of time in decimal years
+        :param start_date: start date decimal years
+        :param end_date: end date in decimal years
+        :param bin_days: number of days to calculate the brdf over.
+        return: k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
         """
 
         #  TODO:  sort out resampling of and averaging of data here.
@@ -211,10 +211,10 @@ class RoujeanBRDF():
         """
         Normalises the reflectance to nadir given the roujean coefficients.
 
-        @param sun_zenith: <numpy> array of sun zenith angles in radians.
-        @param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
-        @param k_coeffs: <numpy> (1, 3) array of Roujean coefficients k0, k1 and k2 respectively
-        @return brdf: <numpy> reflectance at nadir
+        :param sun_zenith: <numpy> array of sun zenith angles in radians.
+        :param relative_azimuth: <numpy> array of relative (sun/sensor) azimuth angles in radians.
+        :param k_coeffs: <numpy> (1, 3) array of Roujean coefficients k0, k1 and k2 respectively
+        return brdf: <numpy> reflectance at nadir
         """
 
         sensor_zenith = scipy.zeros(sun_zenith.shape)
@@ -226,9 +226,9 @@ class RoujeanBRDF():
         """
         This will save the numpy array to a csv file.  Will work with any numpy array.
 
-        @param filename: <string> The name and path of the file to be saved
-        @param k_coeff: <numpy> The array to be saved
-        @return:
+        :param filename: <string> The name and path of the file to be saved
+        :param k_coeff: <numpy> The array to be saved
+        return:
         """
         lg.info('Writing k_coeffs to file :: ' + filename)
         scipy.savetxt(filename, k_coeff, delimiter=",")

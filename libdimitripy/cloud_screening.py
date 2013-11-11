@@ -69,10 +69,10 @@ class CKMethod():
         """
         Can be used instead of the constructor.  Essentially does the same thing.  API candy
 
-        @param clear_images: 3D array of clear sky images
-        @param partly_cloudy_images: 3D array of partly cloudy images
-        @param cloudy_images: 3D array of cloudy images
-        @return:
+        :param clear_images: 3D array of clear sky images
+        :param partly_cloudy_images: 3D array of partly cloudy images
+        :param cloudy_images: 3D array of cloudy images
+        :return:
         """
 
         self.clear_images = scipy.asarray(clear_images)
@@ -84,7 +84,7 @@ class CKMethod():
 
         Model is A*x**b) where model [A, b]
 
-        @return:
+        :return:
         """
 
         clear_model = scipy.zeros((1, 2), dtype=DTYPE)  # initialise an empty vector
@@ -140,9 +140,9 @@ class CKMethod():
         """
 
 
-        @rtype : object
-        @param image:
-        @return:
+        :rtype : object
+        :param image:
+        :return:
         """
         image_size = image.shape
         image_mean = scipy.zeros(1, dtype=DTYPE)
@@ -184,7 +184,7 @@ class CKMethod():
 
         TODO kwargs the initial guesses
 
-        @return:
+        :return:
         """
         lg.debug('Fitting curve, CKMethod')
         x = window_size
@@ -204,10 +204,10 @@ class CKMethod():
 
     def score_image(self, image):
         """
-        This finds weather the image is cloudy or not.
+        This finds whether the image is cloudy or not.
 
-        @param image:
-        @return:
+        :param image:
+        :return:
         """
 
         pickle_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache/ck_cloud.p')
