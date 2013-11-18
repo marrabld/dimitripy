@@ -56,3 +56,4 @@ class TestCKMethod(unittest.TestCase):
         score = self.ck_method.score_image(self.cloudy_image)
         self.assertEquals(score, 2)
 
+

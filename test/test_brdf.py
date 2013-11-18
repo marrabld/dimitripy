@@ -64,7 +64,7 @@ class TestBrdf(unittest.TestCase):
                                                                                  self.test_object.reflectance[:,
                                                                                  self.test_band])
         #self.assertIsInstance(k_coeff, scipy.ndarray)
-        print(k_coeff)
+        #print(k_coeff)
 
     def test_model_brdf_timeseries(self):
         k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s = self.brdf.model_brdf_timeseries(

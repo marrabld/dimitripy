@@ -50,6 +50,7 @@ class DimitriObject:
         self.sensor_name = None
         self.reflectance = None
         self.reflectance_std = None
+        self.shape = None
 
     def __init__(self, meta_data):
         """
@@ -87,6 +88,7 @@ class DimitriObject:
         self.sensor_name = meta_data['sensor_name']
         self.reflectance = meta_data['reflectance']
         self.reflectance_std = meta_data['reflectance_std']
+        self.shape = meta_data['reflectance'].shape
 
 
     def __str__(self):
@@ -102,7 +104,8 @@ class DimitriObject:
                ' wvap, bands,' \
                ' sensor_name,' \
                ' reflectance,' \
-               ' reflectance_std'
+               ' reflectance_std,' \
+               ' shape'
 
     def __getitem__(self, key):
         if key == 'reflectance':

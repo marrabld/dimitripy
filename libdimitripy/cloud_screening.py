@@ -12,6 +12,7 @@ import libdimitripy.base
 import scipy.ndimage
 import ConfigParser
 import pickle
+import libdimitripy.brdf
 
 DTYPE = libdimitripy.base.GLOBALS.DTYPE
 DEBUG_LEVEL = libdimitripy.base.GLOBALS.DEBUG_LEVEL
@@ -174,6 +175,7 @@ class CKMethod():
 
         #!!!! for testing
         import pylab
+
         pylab.plot(window_size, image_std)
         pylab.show()
 
@@ -229,6 +231,13 @@ class CKMethod():
         pc_residual = scipy.absolute(fitfunc(p, window_size) - fitfunc(partly_cloudy_model, window_size))
         cloudy_residual = scipy.absolute(fitfunc(p, window_size) - fitfunc(cloudy_model, window_size))
 
+        clear_residual[scipy.isinf(clear_residual)] = 0.0
+        clear_residual[scipy.isnan(clear_residual)] = 0.0
+        pc_residual[scipy.isinf(pc_residual)] = 0.0
+        pc_residual[scipy.isnan(pc_residual)] = 0.0
+        cloudy_residual[scipy.isinf(cloudy_residual)] = 0.0
+        cloudy_residual[scipy.isnan(cloudy_residual)] = 0.0
+
         clear_norm = scipy.linalg.norm(clear_residual)
         pc_norm = scipy.linalg.norm(pc_residual)
         cloudy_norm = scipy.linalg.norm(cloudy_residual)
@@ -243,3 +252,60 @@ class CKMethod():
         idx = scipy.abs(a - a0).argmin()
         return a.flat[idx]
 
+
+class BRDFMethod():
+    def __init__(self):
+        #self.clear_image_object = ''  # list of Dimitiri objects that are clear sky.
+        self.brdf = libdimitripy.brdf.RoujeanBRDF()
+
+
+    def train_model(self, image_object, update_cache=True):
+        """
+        Calculates the Roujean k coefficients for the BRDF model based on the clear sky images.
+        Saves the k coeffs to the cache for later use
+
+        @return:
+        """
+        lg.debug('Training model for BRDFMethod of cloud screening')
+
+        k_coeffs, residual, rank, singular_values = self.brdf.calc_roujean_coeffs(image_object.sun_zenith,
+                                                                                  image_object.sensor_zenith,
+                                                                                  image_object.relative_azimuth(),
+                                                                                  image_object.reflectance)
+
+        if update_cache:
+            pickle_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'cache/brdf_cloud.p')
+            pickle.dump(k_coeffs, open(pickle_file, "wb"))
+
+        return k_coeffs
+
+    def calc_brdf_modelled_reflectance(self, image_object, k_coeffs):
+        """
+        For the list of images, calculate the modelled reflectance using the Roujean coefficients
+
+        @param image_object:
+        :param k_coeffs:
+        @return:
+        """
+        lg.debug('Calculating modelled reflectance')
+
+        brdf_ref = self.brdf.model_brdf(image_object.sun_zenith, image_object.sensor_zenith,
+                                        image_object.relative_azimuth(), k_coeffs)
+
+        return brdf_ref
+
+    def score_images(self, reflectance, modelled_reflectance, threshold=0.1):
+        """
+        Compare the modelled reflectance with the measured reflectance.  score them as cloudy or not
+        based on the threshold
+
+        @param reflectance:
+        @param modelled_reflectance:
+        @param threshold:
+        @return idx:
+        """
+
+        diff = reflectance - modelled_reflectance
+        idx = (diff <= (threshold * -1.0)) | (diff >= threshold)
+
+        return idx
