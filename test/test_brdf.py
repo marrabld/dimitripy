@@ -1,6 +1,4 @@
 __author__ = 'marrabld'
-
-__author__ = 'marrabld'
 import sys
 import scipy
 
