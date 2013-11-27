@@ -58,7 +58,7 @@ class Lut():
                     self.lut_data = scipy.zeros(self.labels['dimensions'])
 
                     #  Start looping through the data
-                    if 'BO' in filename:
+                    if 'BO' in filename and 'func' in filename:
                         aerosol_label = 'power_term'
                     else:
                         aerosol_label = 'tau550'
@@ -165,20 +165,14 @@ class Lut():
 
                                     waves = lut_labels['lambda'][idx_wave]
                                     lut_vals = lut[idx_wave, m_iter, l_iter, k_iter, j_iter, i_iter]
-                                    #if lut_vals.shape[0] != waves.shape[0]:
                                     band_weights = 0
                                     band_ref = 0
 
                                     ##########
                                     #  convolve the LUT and RSR
                                     ##########
-                                    #! TEST
-                                    if 412 in waves and l_iter == 0:
-                                        print ('before convolution')
-                                        print(lut_vals)
 
                                     for wave_iter, wave in enumerate(waves):
-                                        #lut_vals = lut[idx_wave][m_iter][l_iter][k_iter][j_iter][i_iter]
                                         band_ref += f(wave) * lut_vals[wave_iter]
                                         band_weights += f(wave)  # Sum all of the weights in the band
 
@@ -188,10 +182,11 @@ class Lut():
                                     ##########
 
                                     ##########
-                                    #  Need to figure out where to put the wavelength dim.  As they are unlinkely go be parsed in order
+                                    #  Need to figure out where to put the wavelength dim.
+                                    #  As they are unlinkely go be parsed in order
                                     ##########
                                     sorted_band_max = scipy.sort(band_max)
-                                    pos = scipy.linspace(0, len(band_max) ,len(band_max)+1)
+                                    pos = scipy.linspace(0, len(band_max), len(band_max) + 1)
                                     wave_pos = int(pos[sorted_band_max == band_max[n_iter]])
 
                                     if band_ref == 0 or band_weights == 0:
@@ -202,11 +197,6 @@ class Lut():
                                         dimitri_lut_data[wave_pos, m_iter, l_iter, k_iter, j_iter,
                                                          i_iter] = band_ref / band_weights
 
-                                        #! TEST
-                                    if 412 in waves and l_iter == 0:
-                                        print ('after convolution')
-                                        print(dimitri_lut_data[n_iter, m_iter, l_iter, k_iter, j_iter,
-                                                               i_iter])
         else:  # We are the small LUT
             for i_iter, power_term in enumerate(lut_labels['tau550']):
                 for j_iter, rsr_func in enumerate(rsr_list):
@@ -261,36 +251,19 @@ class Lut():
         f.write(header_txt)
         f.write('# lambda: ')
         writer.writerow(lut_labels['lambda'])
+        f.write('# thetas: ')
+        writer.writerow(lut_labels['theta_s'])
         f.write('# thetav: ')
         writer.writerow(lut_labels['theta_v'])
         f.write('# Inner loop is on theav, then on bands \n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):
-                    #f.write('theta_v :: ' + str(lut_labels['theta_v'][j_iter]) + ' ')
                     for k_iter, delta_phi in enumerate(lut_labels['delta_phi']):
-                        #f.write('delta_phi :: ' + str(lut_labels['delta_phi'][k_iter]) + ' ')
                         for l_iter, wind in enumerate(lut_labels['wind']):
-                            #for m_iter, tau550 in enumerate(lut_labels['tau550']):  # May be tau550 or power term
                             val = lut[wave_iter, i_iter, j_iter, k_iter, l_iter, :]
-                            #val = lut[wave_iter, l_iter, k_iter, j_iter, i_iter, :]
-                            #val = lut[wave_iter, k_iter, l_iter, j_iter, i_iter, :]
-                            #val = lut[wave_iter, l_iter, j_iter, k_iter, i_iter, :]
-                            #val = lut[0, 0, 0, 0, 0, :]
-                            #print(theta_v)
-                            #f.write('lambda :: ' + str(lut_labels['lambda'][wave_iter]) + ' ')
                             writer.writerow(val)
 
-
-        #
-        ##for i_iter, power_term in enumerate(self.labels['tau550']):  # May be tau550 or powerterm
-        #for l_iter, theta_v in enumerate(self.labels['theta_v']):
-        #    for m_iter, theta_s in enumerate(self.labels['theta_s']):
-        #        for j_iter, wind in enumerate(self.labels['wind']):
-        #            for k_iter, delta_phi in enumerate(self.labels['delta_phi']):
-        #                for n_iter, wavelength in enumerate(self.labels['lambda']):
-        #                    val = lut[n_iter][m_iter][l_iter][k_iter][j_iter][:]
-        #                    writer.writerow(val)
 
 
 
