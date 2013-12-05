@@ -134,15 +134,15 @@ class TestLutTool(unittest.TestCase):
         #    [0.000000, 2.840910, 6.521060, 10.222950, 13.929760, 17.638420, 21.347980, 25.058050, 28.768431, 32.479012,
         #     36.189732, 39.900551, 43.611439])
 
-        import csv
-        meris_lut = scipy.zeros((1, 1))
-        f = open('/home/marrabld/projects/dimitripy/scripts/data/LUTS/MERIS/RHOR_MERIS.txt')
-        csv_reader = csv.reader(f, delimiter=' ')
-        for row in csv_reader:
-            if '#' in row:
-                pass
-            else:
-                meris_lut = scipy.vstack((meris_lut, scipy.asarray(row)))  # psuedo lut
-
-        pylab.plot(meris_lut)
-        pylab.show()
+        #import csv
+        #meris_lut = scipy.zeros((1, 1))
+        #f = open('/home/marrabld/projects/dimitripy/scripts/data/LUTS/MERIS/RHOR_MERIS.txt')
+        #csv_reader = csv.reader(f, delimiter=' ')
+        #for row in csv_reader:
+        #    if '#' in row:
+        #        pass
+        #    else:
+        #        meris_lut = scipy.vstack((meris_lut, scipy.asarray(row)))  # psuedo lut
+        #
+        #pylab.plot(meris_lut)
+        #pylab.show()

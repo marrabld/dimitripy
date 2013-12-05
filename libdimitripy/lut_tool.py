@@ -208,20 +208,33 @@ class Lut():
                     ##########
                     #  Grab all the waves from the lut in our band
                     ##########
-                    idx_wave = band_min[j_iter] <= lut_labels['lambda'] <= band_max[j_iter]
+                    idx_wave_min = lut_labels['lambda'] >= band_min[j_iter]
+                    idx_wave_max = lut_labels['lambda'] <= band_max[j_iter]
+                    idx_wave = idx_wave_min & idx_wave_max
+
                     waves = lut_labels['lambda'][idx_wave]
+                    lut_vals = lut[idx_wave, i_iter]
                     band_weights = 0
                     band_ref = 0
 
                     for wave_iter, wave in enumerate(waves):
-                        band_ref += f(wave) * lut[wave_iter, j_iter]
+                        band_ref += f(wave) * lut_vals[wave_iter]
                         band_weights += f(wave)  # Sum all of the weights in the band
 
                     ##########
                     #  All of the waves are condensed down to one value which is the centre band
                     #  of the RSR
                     ##########
-                    dimitri_lut_data[i_iter, j_iter] = band_ref / band_weights
+
+                    ##########
+                    #  Need to figure out where to put the wavelength dim.
+                    #  As they are unlinkely go be parsed in order
+                    ##########
+                    sorted_band_max = scipy.sort(band_max)
+                    pos = scipy.linspace(0, len(band_max), len(band_max) + 1)
+                    wave_pos = int(pos[sorted_band_max == band_max[j_iter]])
+
+                    dimitri_lut_data[wave_pos, i_iter] = band_ref / band_weights
 
         return dimitri_lut_data
 
@@ -264,6 +277,22 @@ class Lut():
                             val = lut[wave_iter, i_iter, j_iter, k_iter, l_iter, :]
                             writer.writerow(val)
 
+    def write_aot_lut_to_file(self, lut, lut_labels, filename='lut.txt', header_txt='#'):
+
+        f = open(filename, 'wb')
+        writer = csv.writer(f, delimiter=' ')
+
+        ##########
+        #  Write header information
+        #  which we grab from lut_label
+        ##########
+
+        f.write(header_txt)
+        f.write('# lambda: ')
+        writer.writerow(lut_labels['lambda'])
+        for wave_iter, wavelength in enumerate(lut_labels['lambda']):
+            val = lut[wave_iter, :]
+            writer.writerow(val)
 
 
 
