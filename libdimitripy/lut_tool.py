@@ -268,6 +268,8 @@ class Lut():
         writer.writerow(lut_labels['theta_s'])
         f.write('# thetav: ')
         writer.writerow(lut_labels['theta_v'])
+        f.write('# deltaphi: ')
+        writer.writerow(lut_labels['delta_phi'])
         f.write('# Inner loop is on theav, then on bands \n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
@@ -277,7 +279,7 @@ class Lut():
                             val = lut[wave_iter, i_iter, j_iter, k_iter, l_iter, :]
                             writer.writerow(val)
 
-    def write_aot_lut_to_file(self, lut, lut_labels, filename='lut.txt', header_txt='#'):
+    def write_aot_lut_to_file(self, lut, lut_labels, filename='aot_lut.txt', header_txt='#'):
 
         f = open(filename, 'wb')
         writer = csv.writer(f, delimiter=' ')
@@ -293,6 +295,65 @@ class Lut():
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             val = lut[wave_iter, :]
             writer.writerow(val)
+
+    def write_rayleigh_lut_to_file(self, lut, lut_labels, filename='R_lut.txt', header_txt='#'):
+        f = open(filename, 'wb')
+        writer = csv.writer(f, delimiter=' ')
+
+        ##########
+        #  Write header information
+        #  which we grab from lut_label
+        ##########
+
+        f.write(header_txt)
+        f.write('# lambda: ')
+        writer.writerow(lut_labels['lambda'])
+        f.write('# thetas: ')
+        writer.writerow(lut_labels['theta_s'])
+        f.write('# thetav: ')
+        writer.writerow(lut_labels['theta_v'])
+        f.write('# deltaphi: ')
+        writer.writerow(lut_labels['delta_phi'])
+        f.write('# wind: ')
+        writer.writerow(lut_labels['wind'])
+        f.write('# Inner loop is on wind, then deltaphi, thetav, thetas and bands\n')
+        for wave_iter, wavelength in enumerate(lut_labels['lambda']):
+            for i_iter, theta_s in enumerate(lut_labels['theta_s']):
+                for j_iter, theta_v in enumerate(lut_labels['theta_v']):
+                    for k_iter, delta_phi in enumerate(lut_labels['delta_phi']):
+                        for l_iter, wind in enumerate(lut_labels['wind']):
+                            val = lut[wave_iter, i_iter, j_iter, k_iter, l_iter, 0]
+                            writer.writerow([val])
+
+
+    def write_func_lut_to_file(self, lut, lut_labels, filename='func_lut.txt', header_txt='#'):
+        f = open(filename, 'wb')
+        writer = csv.writer(f, delimiter=' ')
+
+        ##########
+        #  Write header information
+        #  which we grab from lut_label
+        ##########
+
+        f.write(header_txt)
+        f.write('# lambda: ')
+        writer.writerow(lut_labels['lambda'])
+        f.write('# thetas: ')
+        writer.writerow(lut_labels['theta_s'])
+        f.write('# thetav: ')
+        writer.writerow(lut_labels['theta_v'])
+        f.write('# deltaphi: ')
+        writer.writerow(lut_labels['delta_phi'])
+        f.write('# wind: ')
+        writer.writerow(lut_labels['wind'])
+        for wave_iter, wavelength in enumerate(lut_labels['lambda']):
+            for i_iter, theta_s in enumerate(lut_labels['theta_s']):
+                for j_iter, theta_v in enumerate(lut_labels['theta_v']):
+                    for k_iter, delta_phi in enumerate(lut_labels['delta_phi']):
+                        for l_iter, wind in enumerate(lut_labels['wind']):
+                            val = lut[wave_iter, i_iter, j_iter, k_iter, l_iter, :]
+                            writer.writerow(val)
+
 
 
 
