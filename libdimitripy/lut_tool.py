@@ -103,7 +103,7 @@ class Lut():
             num_lines = self.file_len(rsr_file)
             rsr_2d = scipy.zeros((num_lines - 1, 2))  # -1 because of the header
 
-            rsr_file = open(rsr_file) # now we make it a file object
+            rsr_file = open(rsr_file)  # now we make it a file object
             rsr_reader = csv.reader(rsr_file, delimiter=';')
             for row_num, row in enumerate(rsr_reader):
                 if row_num == 0:
@@ -113,8 +113,10 @@ class Lut():
                         rsr_2d[row_num - 1][col_num] = col
 
             #rsr_2d = scipy.trim_zeros(rsr_2d)  # Some of the csv files have trailing lines
-            tmp_0 = scipy.trim_zeros(rsr_2d[:, 0])
-            tmp_1 = scipy.trim_zeros(rsr_2d[:, 1])
+            #tmp_0 = scipy.trim_zeros(rsr_2d[:, 0])
+            #tmp_1 = scipy.trim_zeros(rsr_2d[:, 1])
+            tmp_0 = rsr_2d[:, 0]
+            tmp_1 = rsr_2d[:, 1]
             rsr_2d = scipy.vstack((tmp_0.T, tmp_1.T)).T
             rsr_list.append(rsr_2d)
 
@@ -173,8 +175,12 @@ class Lut():
                                     ##########
 
                                     for wave_iter, wave in enumerate(waves):
-                                        band_ref += f(wave) * lut_vals[wave_iter]
-                                        band_weights += f(wave)  # Sum all of the weights in the band
+                                        try:
+                                            band_ref += f(wave) * lut_vals[wave_iter]
+                                            band_weights += f(wave)  # Sum all of the weights in the band
+                                        except:
+                                            print wave
+                                            print ('BLAHH')
 
                                     ##########
                                     #  All of the waves are condensed down to one value which is the centre band
