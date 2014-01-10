@@ -18,23 +18,25 @@ satellite = {'name': ['MERIS', 'VEGETATION', 'AATSR', 'MODISA', 'PARASOL', 'ATSR
                         1629, 2114, 646, 857],
                        [443, 490, 565, 670, 763, 765, 865, 910, 1020], [555, 660, 865, 1610]]}  # no greater than 5000nm
 
-sat_name = satellite['name'][5]
-sat_waves = satellite['waves'][5]
+sat_name = satellite['name'][2]
+sat_waves = satellite['waves'][2]
+aerosol_type = 'MAR99V'
 
-hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
+#hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
+hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mar99v_2014_01_05'
 dim_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/DIMITRI'
 rsr_dir = '/home/marrabld/projects/DIMITRI_2.0/AUX_DATA/spectral_response/' + sat_name
 
-trans_up_hyper_lut_file = 'hs386_tup_PP_V_MC50_R010_100000_mean.txt'
-trans_down_hyper_lut_file = 'hs386_tdown_PP_V_MC50_R010_100000_mean.txt'
-aot_hyper_lut_file = 'hs386_aot_PP_V_MC50.txt'
-func_hyper_lut_file = 'hs386_PP_V_MC50_BO_10000_func.txt'
-ral_hyper_lut_file = 'hs386_PP_V_MC50_BO_10000_mean.txt'
+trans_up_hyper_lut_file = 'hs386_tup_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
+trans_down_hyper_lut_file = 'hs386_tdown_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
+aot_hyper_lut_file = 'hs386_aot_PP_V_' + aerosol_type + '.txt'
+func_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_func.txt'
+ral_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_mean.txt'
 
-trans_up_dim_lut_file = 'TRA_UP_' + sat_name + '_MAR-50.txt'
-trans_down_dim_lut_file = 'TRA_DOWN_' + sat_name + '_MAR-50.txt'
-aot_dim_lut_file = 'TAUA_' + sat_name + '_MAR-50.txt'
-func_dim_lut_file = 'XC_' + sat_name + '_MAR-50.txt'
+trans_up_dim_lut_file = 'TRA_UP_' + sat_name + '_' + aerosol_type + '.txt'
+trans_down_dim_lut_file = 'TRA_DOWN_' + sat_name + '_' + aerosol_type + '.txt'
+aot_dim_lut_file = 'TAUA_' + sat_name + '_' + aerosol_type + '.txt'
+func_dim_lut_file = 'XC_' + sat_name + '_' + aerosol_type + '.txt'
 ral_dim_lut_file = 'RHOR_' + sat_name + '.txt'
 
 ##########
@@ -54,7 +56,7 @@ hyper_lut, hyper_lut_lables = lut.read_lut(trans_up_hyper_lut_file)
 rsr_list = lut.read_rsr_from_directory(rsr_dir)
 dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# MERIS total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model MAR-50\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+header_string = '# ' + sat_name + ' total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
 hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
 lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_up_dim_lut_file, header_txt=header_string)
 
@@ -75,7 +77,7 @@ hyper_lut, hyper_lut_lables = lut.read_lut(trans_down_hyper_lut_file)
 rsr_list = lut.read_rsr_from_directory(rsr_dir)
 dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# MERIS total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model MAR-50\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+header_string = '# ' + sat_name + ' total downward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
 hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
 lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_down_dim_lut_file, header_txt=header_string)
 
@@ -96,7 +98,7 @@ hyper_lut, hyper_lut_lables = lut.read_lut(aot_hyper_lut_file)
 rsr_list = lut.read_rsr_from_directory(rsr_dir)
 dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# MERIS aerosol optical thickness for aerosol MAR-50\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see MERIS Reference Model Document\n# (first optical thickness is zero)\n'
+header_string = '# ' + sat_name + ' aerosol optical thickness for aerosol ' + aerosol_type + '\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see MERIS Reference Model Document\n# (first optical thickness is zero)\n'
 hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
 lut.write_aot_lut_to_file(dimitri_lut, hyper_lut_lables, aot_dim_lut_file, header_txt=header_string)
 
@@ -118,7 +120,7 @@ hyper_lut, hyper_lut_lables = lut.read_lut(func_hyper_lut_file)
 rsr_list = lut.read_rsr_from_directory(rsr_dir)
 dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# MERIS XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model MAR-50\n# Columns gives the 3 XC coefficients\n# (first optical thickness is zero hence gives Rayleigh reflectance)\n'
+header_string = '# ' + sat_name + ' XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model ' + aerosol_type + '\n# Columns gives the 3 XC coefficients\n# (first optical thickness is zero hence gives Rayleigh reflectance)\n'
 hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
 lut.write_func_lut_to_file(dimitri_lut, hyper_lut_lables, func_dim_lut_file, header_txt=header_string)
 
@@ -140,7 +142,7 @@ hyper_lut, hyper_lut_lables = lut.read_lut(ral_hyper_lut_file)
 rsr_list = lut.read_rsr_from_directory(rsr_dir)
 dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# MERIS rayleigh reflectance\n'
+header_string = '# ' + sat_name + ' rayleigh reflectance\n'
 hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
 lut.write_rayleigh_lut_to_file(dimitri_lut, hyper_lut_lables, ral_dim_lut_file, header_txt=header_string)
 

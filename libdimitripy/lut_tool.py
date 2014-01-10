@@ -124,6 +124,8 @@ class Lut():
 
     def convolve_rsr_lut(self, rsr_list, lut, lut_labels):
 
+        #  Todo, check the min and max values in the RSRs, if the are greater than the LUT then drop them from the list
+
         # Figure out wave lengths belong to which list.
         band_min = []
         band_max = []
@@ -180,6 +182,7 @@ class Lut():
                                             band_weights += f(wave)  # Sum all of the weights in the band
                                         except:
                                             print wave
+                                            lg.exception(str(wave))
                                             print ('BLAHH')
 
                                     ##########
@@ -196,7 +199,7 @@ class Lut():
                                     wave_pos = int(pos[sorted_band_max == band_max[n_iter]])
 
                                     if band_ref == 0 or band_weights == 0:
-                                        lg.warning('no data for this band :: ' + str(wave) + 'making -999')
+                                        lg.warning('no data for this band :: ' + str(wave) + ' making -999')
                                         dimitri_lut_data[wave_pos, m_iter, l_iter, k_iter, j_iter,
                                                          i_iter] = -999  # for now
                                     else:
@@ -276,7 +279,10 @@ class Lut():
         writer.writerow(lut_labels['theta_v'])
         f.write('# deltaphi: ')
         writer.writerow(lut_labels['delta_phi'])
-        f.write('# Inner loop is on theav, then on bands \n')
+        if lut_labels['theta_v'] > 1:
+            f.write('# Inner loop is on thetav, then on bands \n')
+        else:
+            f.write('# Inner loop is on thetas, then on bands \n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):
