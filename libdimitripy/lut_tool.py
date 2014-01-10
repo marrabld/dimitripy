@@ -273,16 +273,22 @@ class Lut():
         f.write(header_txt)
         f.write('# lambda: ')
         writer.writerow(lut_labels['lambda'])
-        f.write('# thetas: ')
-        writer.writerow(lut_labels['theta_s'])
-        f.write('# thetav: ')
-        writer.writerow(lut_labels['theta_v'])
-        f.write('# deltaphi: ')
-        writer.writerow(lut_labels['delta_phi'])
-        if lut_labels['theta_v'] > 1:
+        if lut_labels['theta_s'].shape[0] > 1:
+            f.write('# thetas: ')
+            writer.writerow(lut_labels['theta_s'])
+        if lut_labels['theta_v'].shape[0] > 1:
+            f.write('# thetav: ')
+            writer.writerow(lut_labels['theta_v'])
+            #f.write('# deltaphi: ')
+        #writer.writerow(lut_labels['delta_phi'])
+        if lut_labels['theta_v'].shape[0] > 1:
             f.write('# Inner loop is on thetav, then on bands \n')
         else:
             f.write('# Inner loop is on thetas, then on bands \n')
+        dim = str(lut_labels['dimensions'])
+        dim = dim.replace('1.', '').replace('[', '').replace(']', '').replace('.', '').strip()
+        dim = ' '.join(dim.split())  # get rid of repeating spaces replace them with only one.
+        f.write('# Dimensions: ' + dim + '\n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):
@@ -304,8 +310,16 @@ class Lut():
         f.write(header_txt)
         f.write('# lambda: ')
         writer.writerow(lut_labels['lambda'])
+        # Have to add 1 on to the final dimension to allow for tau = 0
+        dim = lut_labels['dimensions']
+        dim[-1] += 1
+        dim = str(dim)
+        dim = dim.replace('1.', '').replace('[', '').replace(']', '').replace('.', '').strip()
+        dim = ' '.join(dim.split())  # get rid of repeating spaces replace them with only one.
+        f.write('# Dimensions: ' + dim + '\n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             val = lut[wave_iter, :]
+            f.write('0.0 ')
             writer.writerow(val)
 
     def write_rayleigh_lut_to_file(self, lut, lut_labels, filename='R_lut.txt', header_txt='#'):
@@ -329,6 +343,10 @@ class Lut():
         f.write('# wind: ')
         writer.writerow(lut_labels['wind'])
         f.write('# Inner loop is on wind, then deltaphi, thetav, thetas and bands\n')
+        dim = str(lut_labels['dimensions'])
+        dim = dim.replace('1.', '').replace('[', '').replace(']', '').replace('.', '').strip()
+        dim = ' '.join(dim.split())  # get rid of repeating spaces replace them with only one.
+        f.write('# Dimensions: ' + dim + '\n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):
@@ -358,6 +376,10 @@ class Lut():
         writer.writerow(lut_labels['delta_phi'])
         f.write('# wind: ')
         writer.writerow(lut_labels['wind'])
+        dim = str(lut_labels['dimensions'])
+        dim = dim.replace('1.', '').replace('[', '').replace(']', '').replace('.', '').strip()
+        dim = ' '.join(dim.split())  # get rid of repeating spaces replace them with only one.
+        f.write('# Dimensions: ' + dim + '\n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):

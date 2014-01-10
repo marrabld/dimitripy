@@ -4,7 +4,6 @@ import sys
 
 sys.path.append("../..")
 
-import scipy
 import libdimitripy.ingest
 import libdimitripy.base
 import libdimitripy.brdf
@@ -18,133 +17,133 @@ satellite = {'name': ['MERIS', 'VEGETATION', 'AATSR', 'MODISA', 'PARASOL', 'ATSR
                         1629, 2114, 646, 857],
                        [443, 490, 565, 670, 763, 765, 865, 910, 1020], [555, 660, 865, 1610]]}  # no greater than 5000nm
 
-sat_name = satellite['name'][2]
-sat_waves = satellite['waves'][2]
-aerosol_type = 'MAR99V'
+aerosol_type = 'MC50'
 
-#hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
-hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mar99v_2014_01_05'
-dim_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/DIMITRI'
-rsr_dir = '/home/marrabld/projects/DIMITRI_2.0/AUX_DATA/spectral_response/' + sat_name
+for name_iter, sat_name in enumerate(satellite['name']):
+    sat_waves = satellite['waves'][name_iter]
+    hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
+    #hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mar99v_2014_01_05'
+    dim_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/DIMITRI'
+    rsr_dir = '/home/marrabld/projects/DIMITRI_2.0/AUX_DATA/spectral_response/' + sat_name
 
-trans_up_hyper_lut_file = 'hs386_tup_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
-trans_down_hyper_lut_file = 'hs386_tdown_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
-aot_hyper_lut_file = 'hs386_aot_PP_V_' + aerosol_type + '.txt'
-func_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_func.txt'
-ral_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_mean.txt'
+    trans_up_hyper_lut_file = 'hs386_tup_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
+    trans_down_hyper_lut_file = 'hs386_tdown_PP_V_' + aerosol_type + '_R010_100000_mean.txt'
+    aot_hyper_lut_file = 'hs386_aot_PP_V_' + aerosol_type + '.txt'
+    func_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_func.txt'
+    ral_hyper_lut_file = 'hs386_PP_V_' + aerosol_type + '_BO_10000_mean.txt'
 
-trans_up_dim_lut_file = 'TRA_UP_' + sat_name + '_' + aerosol_type + '.txt'
-trans_down_dim_lut_file = 'TRA_DOWN_' + sat_name + '_' + aerosol_type + '.txt'
-aot_dim_lut_file = 'TAUA_' + sat_name + '_' + aerosol_type + '.txt'
-func_dim_lut_file = 'XC_' + sat_name + '_' + aerosol_type + '.txt'
-ral_dim_lut_file = 'RHOR_' + sat_name + '.txt'
+    trans_up_dim_lut_file = 'TRA_UP_' + sat_name + '_' + aerosol_type + '.txt'
+    trans_down_dim_lut_file = 'TRA_DOWN_' + sat_name + '_' + aerosol_type + '.txt'
+    aot_dim_lut_file = 'TAUA_' + sat_name + '_' + aerosol_type + '.txt'
+    func_dim_lut_file = 'XC_' + sat_name + '_' + aerosol_type + '.txt'
+    ral_dim_lut_file = 'RHOR_' + sat_name + '.txt'
 
-##########
-#  Trans up
-##########
-# Files to read in.  Hyper and Dimitri
-trans_up_hyper_lut_file = os.path.join(hyper_lut_dir, trans_up_hyper_lut_file)
-trans_up_dim_lut_file = os.path.join(dim_lut_dir, trans_up_dim_lut_file)
+    ##########
+    #  Trans up
+    ##########
+    # Files to read in.  Hyper and Dimitri
+    trans_up_hyper_lut_file = os.path.join(hyper_lut_dir, trans_up_hyper_lut_file)
+    trans_up_dim_lut_file = os.path.join(dim_lut_dir, trans_up_dim_lut_file)
 
-# LUT object from dimitripy
-lut = libdimitripy.lut_tool.Lut()
+    # LUT object from dimitripy
+    lut = libdimitripy.lut_tool.Lut()
 
-# Grab the hyper lut and metadata
-hyper_lut, hyper_lut_lables = lut.read_lut(trans_up_hyper_lut_file)
+    # Grab the hyper lut and metadata
+    hyper_lut, hyper_lut_lables = lut.read_lut(trans_up_hyper_lut_file)
 
-# Convolve the spectral response functions
-rsr_list = lut.read_rsr_from_directory(rsr_dir)
-dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
+    # Convolve the spectral response functions
+    rsr_list = lut.read_rsr_from_directory(rsr_dir)
+    dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# ' + sat_name + ' total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
-hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
-lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_up_dim_lut_file, header_txt=header_string)
+    header_string = '# ' + sat_name + ' total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+    hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
+    lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_up_dim_lut_file, header_txt=header_string)
 
-##########
-#  Trans down
-##########
-# Files to read in.  Hyper and Dimitri
-trans_down_hyper_lut_file = os.path.join(hyper_lut_dir, trans_down_hyper_lut_file)
-trans_down_dim_lut_file = os.path.join(dim_lut_dir, trans_down_dim_lut_file)
+    ##########
+    #  Trans down
+    ##########
+    # Files to read in.  Hyper and Dimitri
+    trans_down_hyper_lut_file = os.path.join(hyper_lut_dir, trans_down_hyper_lut_file)
+    trans_down_dim_lut_file = os.path.join(dim_lut_dir, trans_down_dim_lut_file)
 
-# LUT object from dimitripy
-lut = libdimitripy.lut_tool.Lut()
+    # LUT object from dimitripy
+    lut = libdimitripy.lut_tool.Lut()
 
-# Grab the hyper lut and metadata
-hyper_lut, hyper_lut_lables = lut.read_lut(trans_down_hyper_lut_file)
+    # Grab the hyper lut and metadata
+    hyper_lut, hyper_lut_lables = lut.read_lut(trans_down_hyper_lut_file)
 
-# Convolve the spectral response functions
-rsr_list = lut.read_rsr_from_directory(rsr_dir)
-dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
+    # Convolve the spectral response functions
+    rsr_list = lut.read_rsr_from_directory(rsr_dir)
+    dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# ' + sat_name + ' total downward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
-hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
-lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_down_dim_lut_file, header_txt=header_string)
+    header_string = '# ' + sat_name + ' total downward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+    hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
+    lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_down_dim_lut_file, header_txt=header_string)
 
-##########
-#  AOT LUT
-##########
-# Files to read in.  Hyper and Dimitri
-aot_hyper_lut_file = os.path.join(hyper_lut_dir, aot_hyper_lut_file)
-aot_dim_lut_file = os.path.join(dim_lut_dir, aot_dim_lut_file)
+    ##########
+    #  AOT LUT
+    ##########
+    # Files to read in.  Hyper and Dimitri
+    aot_hyper_lut_file = os.path.join(hyper_lut_dir, aot_hyper_lut_file)
+    aot_dim_lut_file = os.path.join(dim_lut_dir, aot_dim_lut_file)
 
-# LUT object from dimitripy
-lut = libdimitripy.lut_tool.Lut()
+    # LUT object from dimitripy
+    lut = libdimitripy.lut_tool.Lut()
 
-# Grab the hyper lut and metadata
-hyper_lut, hyper_lut_lables = lut.read_lut(aot_hyper_lut_file)
+    # Grab the hyper lut and metadata
+    hyper_lut, hyper_lut_lables = lut.read_lut(aot_hyper_lut_file)
 
-# Convolve the spectral response functions
-rsr_list = lut.read_rsr_from_directory(rsr_dir)
-dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
+    # Convolve the spectral response functions
+    rsr_list = lut.read_rsr_from_directory(rsr_dir)
+    dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# ' + sat_name + ' aerosol optical thickness for aerosol ' + aerosol_type + '\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see MERIS Reference Model Document\n# (first optical thickness is zero)\n'
-hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
-lut.write_aot_lut_to_file(dimitri_lut, hyper_lut_lables, aot_dim_lut_file, header_txt=header_string)
+    header_string = '# ' + sat_name + ' aerosol optical thickness for aerosol ' + aerosol_type + '\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see MERIS Reference Model Document\n# (first optical thickness is zero)\n'
+    hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
+    lut.write_aot_lut_to_file(dimitri_lut, hyper_lut_lables, aot_dim_lut_file, header_txt=header_string)
 
-##########
-#  func LUT
-##########
+    ##########
+    #  func LUT
+    ##########
 
-# Files to read in.  Hyper and Dimitri
-func_hyper_lut_file = os.path.join(hyper_lut_dir, func_hyper_lut_file)
-func_dim_lut_file = os.path.join(dim_lut_dir, func_dim_lut_file)
+    # Files to read in.  Hyper and Dimitri
+    func_hyper_lut_file = os.path.join(hyper_lut_dir, func_hyper_lut_file)
+    func_dim_lut_file = os.path.join(dim_lut_dir, func_dim_lut_file)
 
-# LUT object from dimitripy
-lut = libdimitripy.lut_tool.Lut()
+    # LUT object from dimitripy
+    lut = libdimitripy.lut_tool.Lut()
 
-# Grab the hyper lut and metadata
-hyper_lut, hyper_lut_lables = lut.read_lut(func_hyper_lut_file)
+    # Grab the hyper lut and metadata
+    hyper_lut, hyper_lut_lables = lut.read_lut(func_hyper_lut_file)
 
-# Convolve the spectral response functions
-rsr_list = lut.read_rsr_from_directory(rsr_dir)
-dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
+    # Convolve the spectral response functions
+    rsr_list = lut.read_rsr_from_directory(rsr_dir)
+    dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# ' + sat_name + ' XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model ' + aerosol_type + '\n# Columns gives the 3 XC coefficients\n# (first optical thickness is zero hence gives Rayleigh reflectance)\n'
-hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
-lut.write_func_lut_to_file(dimitri_lut, hyper_lut_lables, func_dim_lut_file, header_txt=header_string)
+    header_string = '# ' + sat_name + ' XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model ' + aerosol_type + '\n# Columns gives the 3 XC coefficients\n # Inner loop is on wind, then deltaphi, thetav, thetas and bands'
+    hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
+    lut.write_func_lut_to_file(dimitri_lut, hyper_lut_lables, func_dim_lut_file, header_txt=header_string)
 
-##########
-#  Rayleigh LUT
-##########
+    ##########
+    #  Rayleigh LUT
+    ##########
 
-# Files to read in.  Hyper and Dimitri
-ral_hyper_lut_file = os.path.join(hyper_lut_dir, ral_hyper_lut_file)
-ral_dim_lut_file = os.path.join(dim_lut_dir, ral_dim_lut_file)
+    # Files to read in.  Hyper and Dimitri
+    ral_hyper_lut_file = os.path.join(hyper_lut_dir, ral_hyper_lut_file)
+    ral_dim_lut_file = os.path.join(dim_lut_dir, ral_dim_lut_file)
 
-# LUT object from dimitripy
-lut = libdimitripy.lut_tool.Lut()
+    # LUT object from dimitripy
+    lut = libdimitripy.lut_tool.Lut()
 
-# Grab the hyper lut and metadata
-hyper_lut, hyper_lut_lables = lut.read_lut(ral_hyper_lut_file)
+    # Grab the hyper lut and metadata
+    hyper_lut, hyper_lut_lables = lut.read_lut(ral_hyper_lut_file)
 
-# Convolve the spectral response functions
-rsr_list = lut.read_rsr_from_directory(rsr_dir)
-dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
+    # Convolve the spectral response functions
+    rsr_list = lut.read_rsr_from_directory(rsr_dir)
+    dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-header_string = '# ' + sat_name + ' rayleigh reflectance\n'
-hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
-lut.write_rayleigh_lut_to_file(dimitri_lut, hyper_lut_lables, ral_dim_lut_file, header_txt=header_string)
+    header_string = '# ' + sat_name + ' rayleigh reflectance\n'
+    hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
+    lut.write_rayleigh_lut_to_file(dimitri_lut, hyper_lut_lables, ral_dim_lut_file, header_txt=header_string)
 
 ##########
 # Plot the two rayleigh LUTs
