@@ -8,6 +8,7 @@ import os
 import csv
 import glob
 import scipy.interpolate
+import libdimitripy.helper_functions
 
 DTYPE = libdimitripy.base.GLOBALS.DTYPE
 DEBUG_LEVEL = libdimitripy.base.GLOBALS.DEBUG_LEVEL
@@ -96,6 +97,7 @@ class Lut():
         # for files in directory read them in.  build a 3D array and return for convolving
 
         rsr_files = glob.glob(directory + '/*.txt')
+        rsr_files = libdimitripy.helper_functions.Sort.natural_sort(rsr_files)
         rsr_list = []
 
         for rsr_file in rsr_files:
@@ -141,6 +143,7 @@ class Lut():
         dimitri_lut_data_dim = lut_labels['dimensions']
         dimitri_lut_data_dim[0] = len(rsr_list)
         dimitri_lut_data = scipy.zeros(dimitri_lut_data_dim)
+        dimitri_lut_data[:] = scipy.NAN
 
         if 'power_term' in lut_labels.keys():
             aerosol_label = 'power_term'
@@ -183,7 +186,7 @@ class Lut():
                                         except:
                                             print wave
                                             lg.exception(str(wave))
-                                            print ('BLAHH')
+
 
                                     ##########
                                     #  All of the waves are condensed down to one value which is the centre band
@@ -196,14 +199,21 @@ class Lut():
                                     ##########
                                     sorted_band_max = scipy.sort(band_max)
                                     pos = scipy.linspace(0, len(band_max), len(band_max) + 1)
-                                    wave_pos = int(pos[sorted_band_max == band_max[n_iter]])
+                                    pos = pos[sorted_band_max == band_max[n_iter]]
+                                    if len(pos) > 1:
+                                        #lg.warning('Duplicate band found in RSR')  # Spams the screen.
+                                        pos = pos[0]
+
+                                    wave_pos = int(pos)  # Adding [0] fixes bug where there are multiple bands with the same value
 
                                     if band_ref == 0 or band_weights == 0:
                                         lg.warning('no data for this band :: ' + str(wave) + ' making -999')
                                         dimitri_lut_data[wave_pos, m_iter, l_iter, k_iter, j_iter,
                                                          i_iter] = -999  # for now
                                     else:
-                                        dimitri_lut_data[wave_pos, m_iter, l_iter, k_iter, j_iter,
+                                        #dimitri_lut_data[wave_pos, m_iter, l_iter, k_iter, j_iter,
+                                        #                 i_iter] = band_ref / band_weights
+                                        dimitri_lut_data[n_iter, m_iter, l_iter, k_iter, j_iter,
                                                          i_iter] = band_ref / band_weights
 
         else:  # We are the small LUT
@@ -237,13 +247,15 @@ class Lut():
 
                     ##########
                     #  Need to figure out where to put the wavelength dim.
-                    #  As they are unlinkely go be parsed in order
+                    #  As they are unlikely go be parsed in order
                     ##########
                     sorted_band_max = scipy.sort(band_max)
                     pos = scipy.linspace(0, len(band_max), len(band_max) + 1)
-                    wave_pos = int(pos[sorted_band_max == band_max[j_iter]])
+                    wave_pos = int(pos[sorted_band_max == band_max[j_iter]][0])  # Adding [0] fixes bug where there are multiple bands with the same value
 
-                    dimitri_lut_data[wave_pos, i_iter] = band_ref / band_weights
+                    #dimitri_lut_data[wave_pos, i_iter] = band_ref / band_weights
+                    dimitri_lut_data[j_iter, i_iter] = band_ref / band_weights
+
 
         return dimitri_lut_data
 
@@ -346,7 +358,7 @@ class Lut():
         dim = str(lut_labels['dimensions'])
         dim = dim.replace('1.', '').replace('[', '').replace(']', '').replace('.', '').strip()
         dim = ' '.join(dim.split())  # get rid of repeating spaces replace them with only one.
-        f.write('# Dimensions: ' + dim + '\n')
+        f.write('# Dimensions: ' + dim[:-1] + '\n')
         for wave_iter, wavelength in enumerate(lut_labels['lambda']):
             for i_iter, theta_s in enumerate(lut_labels['theta_s']):
                 for j_iter, theta_v in enumerate(lut_labels['theta_v']):

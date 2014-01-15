@@ -1,6 +1,18 @@
 __author__ = 'marrabld'
 
 import scipy
+import re
+
+
+class Sort():
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def natural_sort(list_to_sort):
+        convert = lambda text: int(text) if text.isdigit() else text.lower()
+        alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
+        return sorted(list_to_sort, key=alphanum_key)
 
 
 class Index():

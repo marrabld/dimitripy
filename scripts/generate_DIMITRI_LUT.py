@@ -13,11 +13,14 @@ import os
 satellite = {'name': ['MERIS', 'VEGETATION', 'AATSR', 'MODISA', 'PARASOL', 'ATSR2'],
              'waves': [[412.5, 442.5, 490.0, 510.0, 560.0, 620.0, 665.0, 681.25, 708.75, 753.75, 761.875, 778.75, 865.0,
                         885.0, 900.0], [450.0, 645, 835, 1665], [555, 660, 865, 1610],
-                       [412, 443, 487, 530, 547, 666, 677, 746, 866, 904, 936, 935, 1383, 466, 554, 1242,
+                       [412, 443, 487, 530, 547, 666, 677, 666, 677, 746, 866, 904, 936, 935, 1383, 466, 554, 1242,
                         1629, 2114, 646, 857],
                        [443, 490, 565, 670, 763, 765, 865, 910, 1020], [555, 660, 865, 1610]]}  # no greater than 5000nm
+# satellite = {'name': ['MODISA'],
+#              'waves': [[412, 443, 487, 530, 547, 666, 666, 677, 677, 746, 866, 904, 936, 935, 1383, 466, 554, 1242,
+#                         1629, 2114, 646, 857]]}  # no greater than 5000nm
 
-aerosol_type = 'MC50'
+aerosol_type = 'MAR99V'
 
 for name_iter, sat_name in enumerate(satellite['name']):
     sat_waves = satellite['waves'][name_iter]
@@ -55,7 +58,7 @@ for name_iter, sat_name in enumerate(satellite['name']):
     rsr_list = lut.read_rsr_from_directory(rsr_dir)
     dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-    header_string = '# ' + sat_name + ' total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+    header_string = '# ' + sat_name + ' total upward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file TAUA_' + sat_name + '.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
     hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
     lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_up_dim_lut_file, header_txt=header_string)
 
@@ -76,7 +79,7 @@ for name_iter, sat_name in enumerate(satellite['name']):
     rsr_list = lut.read_rsr_from_directory(rsr_dir)
     dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-    header_string = '# ' + sat_name + ' total downward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file taua_9.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
+    header_string = '# ' + sat_name + ' total downward transmittance (direct+diffuse, Rayleigh+aerosol) for aerosol model ' + aerosol_type + '\n# Columns gives t_up for 7 aerosol optical thickness (total, i.e. all layers) given in file TAUA_' + sat_name + '.txt\n# (first optical thickness is zero hence gives Rayleigh transmittance)\n'
     hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
     lut.write_trans_lut_to_file(dimitri_lut, hyper_lut_lables, trans_down_dim_lut_file, header_txt=header_string)
 
@@ -97,7 +100,7 @@ for name_iter, sat_name in enumerate(satellite['name']):
     rsr_list = lut.read_rsr_from_directory(rsr_dir)
     dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-    header_string = '# ' + sat_name + ' aerosol optical thickness for aerosol ' + aerosol_type + '\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see MERIS Reference Model Document\n# (first optical thickness is zero)\n'
+    header_string = '# ' + sat_name + ' aerosol optical thickness for aerosol ' + aerosol_type + '\n# Columns gives tau_a corresponding to 7 reference optical thickness at 550 nm, see DIMITRI ATBD Methodology for Vicarious Calibration\n# (first optical thickness is zero)\n'
     hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
     lut.write_aot_lut_to_file(dimitri_lut, hyper_lut_lables, aot_dim_lut_file, header_txt=header_string)
 
@@ -119,7 +122,7 @@ for name_iter, sat_name in enumerate(satellite['name']):
     rsr_list = lut.read_rsr_from_directory(rsr_dir)
     dimitri_lut = lut.convolve_rsr_lut(rsr_list, hyper_lut, hyper_lut_lables)
 
-    header_string = '# ' + sat_name + ' XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model ' + aerosol_type + '\n# Columns gives the 3 XC coefficients\n # Inner loop is on wind, then deltaphi, thetav, thetas and bands'
+    header_string = '# ' + sat_name + ' XC coefficients of rhopath/rhoR fit against optical thickness for aerosol model ' + aerosol_type + '\n# Columns gives the 3 XC coefficients\n# Inner loop is on wind, then deltaphi, thetav, thetas and bands\n'
     hyper_lut_lables['lambda'] = sat_waves  # spoofing the vals here so we know which ones to convolve to.
     lut.write_func_lut_to_file(dimitri_lut, hyper_lut_lables, func_dim_lut_file, header_txt=header_string)
 

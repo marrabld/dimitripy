@@ -201,7 +201,7 @@ class RoujeanBRDF():
             brdf_uncertainty_s[i_iter] = rmse / scipy.sqrt(roujean_diff.shape[0])
             time = decimal_year[bin_idx]
             #mid_time = time[round(time.shape[0] / 2)]  # hopefully this grabs the middle value.
-            mid_time = scipy.mean(time)  # TODO this in nonsense, fix tlater
+            mid_time = scipy.mean(time)  # TODO this in nonsense, fix later
             resampled_time[i_iter] = mid_time
 
         return k_coeff, resampled_time, brdf, brdf_std, brdf_uncertainty_r, brdf_uncertainty_s
