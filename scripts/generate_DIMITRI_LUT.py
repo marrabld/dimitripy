@@ -20,12 +20,12 @@ satellite = {'name': ['MERIS', 'VEGETATION', 'AATSR', 'MODISA', 'PARASOL', 'ATSR
 #              'waves': [[412, 443, 487, 530, 547, 666, 666, 677, 677, 746, 866, 904, 936, 935, 1383, 466, 554, 1242,
 #                         1629, 2114, 646, 857]]}  # no greater than 5000nm
 
-aerosol_type = 'MC50'
+aerosol_type = 'MAR99V'
 
 for name_iter, sat_name in enumerate(satellite['name']):
     sat_waves = satellite['waves'][name_iter]
-    hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
-    #hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mar99v_2014_01_05'
+    #hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mc50'
+    hyper_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/hs386_mar99v_2014_01_05'
     dim_lut_dir = '/home/marrabld/projects/dimitripy/scripts/data/LUTS/DIMITRI'
     rsr_dir = '/home/marrabld/projects/DIMITRI_2.0/AUX_DATA/spectral_response/' + sat_name
 

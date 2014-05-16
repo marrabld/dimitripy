@@ -3,7 +3,7 @@ import copy
 __author__ = 'marrabld'
 import sys
 
-sys.path.append("../..")
+sys.path.append("../")
 
 import libdimitripy.ingest
 import libdimitripy.base
